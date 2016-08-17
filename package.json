@@ -31,5 +31,12 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/cronvel/jsbindat/issues"
+  },
+  "copyright": {
+    "title": "JS Binary Data",
+    "years": [
+      2016
+    ],
+    "owner": "Cédric Ronvel"
   }
 }
