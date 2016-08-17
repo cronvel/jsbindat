@@ -66,54 +66,17 @@ function testParseEq( parse , s )
 
 
 
-describe( "JSON stringify" , function() {
+describe( "basic features" , function() {
 	
 	it( "basic test" , function( done ) {
 		
 		var serialize = jsbindat.serializer( {} ) ;
 		var stream = fs.createWriteStream( './out.jsdat' ) ;
-		serialize( undefined , stream ) ;
-		setTimeout( done , 500 ) ;
-		return ;
+		//serialize( undefined , stream ) ;
 		
-		
-		testStringifyEq( serialize , undefined ) ;
-		testStringifyEq( serialize , null ) ;
-		testStringifyEq( serialize , true ) ;
-		testStringifyEq( serialize , false ) ;
-		
-		testStringifyEq( serialize , 0 ) ;
-		testStringifyEq( serialize , 0.0000000123 ) ;
-		testStringifyEq( serialize , -0.0000000123 ) ;
-		testStringifyEq( serialize , 1234 ) ;
-		testStringifyEq( serialize , -1234 ) ;
-		testStringifyEq( serialize , NaN ) ;
-		testStringifyEq( serialize , Infinity ) ;
-		testStringifyEq( serialize , - Infinity ) ;
-		
-		testStringifyEq( serialize , '' ) ;
-		testStringifyEq( serialize , '0' ) ;
-		testStringifyEq( serialize , '1' ) ;
-		testStringifyEq( serialize , '123' ) ;
-		testStringifyEq( serialize , 'A' ) ;
-		testStringifyEq( serialize , 'ABC' ) ;
-		testStringifyEq( serialize , '\ta"b"c\n\rAB\tC\né~\'#&|_\\-ł"»¢/æ//nĸ^' ) ;
-		testStringifyEq( serialize , '\t\v\x00\x01\x7f\x1fa\x7fa' ) ;
-		
-		testStringifyEq( serialize , {} ) ;
-		testStringifyEq( serialize , {a:1,b:'2'} ) ;
-		testStringifyEq( serialize , {a:1,b:'2',c:true,d:null,e:undefined} ) ;
-		testStringifyEq( serialize , {a:1,b:'2',sub:{c:true,d:null,e:undefined,sub:{f:''}}} ) ;
-		
-		testStringifyEq( serialize , [] ) ;
-		testStringifyEq( serialize , [1,'2'] ) ;
-		testStringifyEq( serialize , [1,'2',[null,undefined,true]] ) ;
-		
-		testStringifyEq( serialize , require( '../sample/sample1.json' ) ) ;
-		testStringifyEq( serialize , require( '../sample/stringFlatObject.js' ) ) ;
-		
-		// Investigate why it does not work
-		//testStringifyEq( serialize , require( '../sample/garbageStringObject.js' ) ) ;
+		serialize( 'toto' , stream , function() {
+			stream.end( done ) ;
+		} ) ;
 	} ) ;
 } ) ;
 

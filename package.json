@@ -1,8 +1,11 @@
 {
   "name": "jsbindat",
-  "version": "0.0.0",
-  "description": "Binary data stringifier and parser for Node.js.",
+  "version": "0.0.1",
+  "description": "Binary data serializer and unserializer for Node.js.",
   "main": "lib/jsbindat.js",
+  "engines": {
+    "node": ">=4.5.0"
+  },
   "directories": {
     "test": "test",
     "bench": "bench"
@@ -25,7 +28,9 @@
   "keywords": [
     "bin",
     "binary",
-    "serializer"
+    "data",
+    "serializer",
+    "unserializer"
   ],
   "author": "Cédric Ronvel",
   "license": "MIT",

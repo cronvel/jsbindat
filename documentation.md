@@ -2,7 +2,7 @@
 
 # JS Binary Data
 
-Binary data stringifier and parser for Node.js.
+Binary data serializer and unserializer for Node.js.
 
 Early alpha.
 

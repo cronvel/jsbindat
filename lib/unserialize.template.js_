@@ -1,0 +1,409 @@
+/*
+	JS Binary Data
+	
+	Copyright (c) 2016 Cédric Ronvel
+	
+	The MIT License (MIT)
+	
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+	
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+	
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+"use strict" ;
+
+
+
+var StreamBuffer = require( './StreamBuffer.js' ) ;
+var common = require( './common.js' ) ;
+
+var depthLimit = Infinity ;
+//#depthLimitValue -> depthLimit
+
+
+
+function unserialize( stream , limit )
+{
+	var v , runtime = {
+		streamBuffer: StreamBuffer.create( stream )
+		//i: 0
+		, depth: 0	//# noDepthTracking!
+		, depthLimit: limit || depthLimit   //# noDepthLimit!
+		, ancestors: []	//# noRefNotation!
+	} ;
+	
+	v = unserializeValue( runtime ) ;
+	
+	return v ;
+}
+
+
+
+module.exports = unserialize ;
+
+
+
+function unserializeValue( runtime )
+{
+	var type = runtime.streamBuffer.readUInt8() ;
+	
+	switch ( type )
+	{
+		case common.TYPE_UNDEFINED :
+			return undefined ;
+		case common.TYPE_NULL :
+			return null ;
+		case common.TYPE_FALSE :
+			return false ;
+		case common.TYPE_TRUE :
+			return true ;
+		case common.TYPE_EMPTY_STRING :
+			return '' ;
+		case common.TYPE_NUMBER :
+			return runtime.stream.readDouble() ;
+		case common.TYPE_TINY_STRING_LPS_UTF8 :
+			return runtime.stream.readTinyStringLpsUtf8( runtime ) ;
+		default :
+			throw new SyntaxError( "Unexpected type of data: " + type.toString( 16 ) ) ;
+	}
+}
+
+
+
+function unserializeArray( str , runtime )
+{
+	var j = 0 , c , v = [] ;
+	
+	//*# noDepthLimit!
+	if ( runtime.depth >= runtime.depthLimit )
+	{
+		unserializeSkipNested( str , runtime ) ;
+		return undefined ;
+	}
+	//*/
+	
+	// Empty array? Try to unserialize a ]
+	c = unserializeIdle( str , runtime ) ;
+	if ( c === 0x5d )
+	{
+		runtime.i ++ ;
+		return v ;
+	}
+	
+	runtime.depth ++ ;	//# noDepthTracking!
+	
+	//*# noRefNotation!
+	// Attach the object to its parent NOW! So it can be used as a reference for its descendants
+	if ( runtime.ancestors.length )
+	{
+		runtime.ancestors[ runtime.ancestors.length - 1 ][ runtime.k ] = v ;
+	}
+	
+	runtime.ancestors.push( v ) ;
+	//*/
+	
+	for ( ;; j ++ )
+	{
+		// unserialize the value :
+		runtime.k = j ;	//# noRefNotation!
+		v[ j ] = unserializeValue( str , runtime ) ;
+		
+		
+		// unserialize comma , or end of array
+		c = unserializeIdle( str , runtime ) ;
+		switch ( c )
+		{
+			case 0x2c :	// ,   comma: next value
+				runtime.i ++ ;
+				break ;
+			
+			case 0x5d :	// ]
+				runtime.i ++ ;
+				runtime.ancestors.pop() ;	//# noRefNotation!
+				runtime.depth -- ;	//# noDepthTracking!
+				return v ;
+			
+			default :
+				throw new Error( "Unexpected " + str[ runtime.i ] ) ;
+		}
+		
+		unserializeIdle( str , runtime ) ;
+	}
+	
+	throw new Error( "Unexpected end" ) ;
+}
+
+
+
+function unserializeObject( str , runtime )
+{
+	var c , v , k ;
+	
+	//*# noDepthTracking!
+	if ( runtime.depth >= runtime.depthLimit )
+	{
+		unserializeSkipNested( str , runtime ) ;
+		return undefined ;
+	}
+	//*/
+	
+	// Empty object? Try to unserialize a }
+	c = unserializeIdle( str , runtime ) ;
+	if ( c === 0x7d )
+	{
+		runtime.i ++ ;
+		//return v ;	// v is not defined ATM
+		return {} ;
+	}
+	
+	runtime.depth ++ ;	//# noDepthTracking!
+	
+	
+	//*# noRefNotation!
+	
+	// /!\ move that into another function? /!\
+	
+	// Unroll the first iteration of the loop to gain some perf:
+	// the circular ref notation expect an object with a single key-value.
+	// Avoid doing string comparison for all other key of the object
+	
+	// unserialize the key
+	if ( c !== 0x22 ) { throw new Error( "Unexpected " + str[ runtime.i ] ) ; }
+	runtime.i ++ ;
+	k = unserializeString( str , runtime ) ;
+	
+	// So this is a reference
+	if ( k === '@@ref@@' )
+	{
+		// unserialize the colon :
+		c = unserializeIdle( str , runtime ) ;
+		if ( c !== 0x3a ) { throw new Error( "Unexpected " + str[ runtime.i ] ) ; }
+		runtime.i ++ ;
+		
+		// unserialize the value
+		unserializeIdle( str , runtime ) ;
+		v = unserializeValue( str , runtime ) ;
+		
+		if ( typeof v === 'number' && v < 0 && -v <= runtime.ancestors.length )
+		{
+			v = runtime.ancestors[ runtime.ancestors.length + v ] ;
+		}
+		else if ( Array.isArray( v ) )
+		{
+			v = getPath( runtime.ancestors[ 0 ] , v ) ;
+		}
+		else
+		{
+			if ( typeof v === 'number' ) { throw new Error( "Bad ref: " + v ) ; }
+			else { throw new Error( "Bad ref: " + typeof v ) ; }
+		}
+		
+		// unserialize end of object: the closing brace }
+		c = unserializeIdle( str , runtime ) ;
+		if ( c !== 0x7d ) { throw new Error( "Unexpected " + str[ runtime.i ] ) ; }
+		
+		runtime.i ++ ;
+		runtime.depth -- ;	//# noDepthTracking!
+		return v ;
+	}
+	else
+	{
+		v = {} ;
+		
+		// Attach the object to its parent NOW! So it can be used as a reference for its descendants
+		if ( runtime.ancestors.length )
+		{
+			runtime.ancestors[ runtime.ancestors.length - 1 ][ runtime.k ] = v ;
+		}
+		
+		runtime.ancestors.push( v ) ;
+	}
+	
+	// unserialize the colon :
+	c = unserializeIdle( str , runtime ) ;
+	if ( c !== 0x3a ) { throw new Error( "Unexpected " + str[ runtime.i ] ) ; }
+	runtime.i ++ ;
+	
+	// unserialize the value
+	unserializeIdle( str , runtime ) ;
+	runtime.k = k ;
+	v[ k ] = unserializeValue( str , runtime ) ;
+	
+	// unserialize comma , or end of object
+	c = unserializeIdle( str , runtime ) ;
+	switch ( c )
+	{
+		case 0x2c :	// ,   comma: next key-value
+			runtime.i ++ ;
+			break ;
+		
+		case 0x7d :	// }
+			runtime.i ++ ;
+			runtime.ancestors.pop() ;
+			runtime.depth -- ;	//# noDepthTracking!
+			return v ;
+		
+		default :
+			throw new Error( "Unexpected " + str[ runtime.i ] ) ;
+	}
+	
+	c = unserializeIdle( str , runtime ) ;
+	
+	//*/
+	
+	// Now the regular loop...
+	
+	//# noRefNotation: v = {} ;
+	
+	for ( ;; )
+	{
+		// unserialize the key
+		if ( c !== 0x22 ) { throw new Error( "Unexpected " + str[ runtime.i ] ) ; }
+		runtime.i ++ ;
+		k = unserializeString( str , runtime ) ;
+		runtime.k = k ;	//# noRefNotation!
+		
+		
+		// unserialize the colon :
+		c = unserializeIdle( str , runtime ) ;
+		if ( c !== 0x3a ) { throw new Error( "Unexpected " + str[ runtime.i ] ) ; }
+		runtime.i ++ ;
+		
+		// unserialize the value
+		unserializeIdle( str , runtime ) ;
+		v[ k ] = unserializeValue( str , runtime ) ;
+		
+		// unserialize comma , or end of object
+		c = unserializeIdle( str , runtime ) ;
+		switch ( c )
+		{
+			case 0x2c :	// ,   comma: next key-value
+				runtime.i ++ ;
+				break ;
+			
+			case 0x7d :	// }
+				runtime.i ++ ;
+				runtime.ancestors.pop() ;	//# noRefNotation!
+				runtime.depth -- ;	//# noDepthTracking!
+				return v ;
+			
+			default :
+				throw new Error( "Unexpected " + str[ runtime.i ] ) ;
+		}
+		
+		
+		c = unserializeIdle( str , runtime ) ;
+	}
+	
+	throw new Error( "Unexpected end" ) ;
+}
+
+
+
+// path is an array of key/index
+function getPath( object , path )
+{
+	var i = 0 , iMax = path.length , p = object ;
+	
+	//console.log( "getPath():" , object , path ) ;
+	
+	try {
+		for ( ; i < iMax ; i ++ )
+		{
+			//console.log( "Next path:" , path[ i ] ) ;
+			p = p[ path[ i ] ] ;
+		}
+	}
+	catch ( error ) {
+		throw new Error( "Bad ref: path not found" ) ;
+	}
+	
+	return p ;
+}
+
+
+
+// Skip the current string, as fast as possible (partial syntax checking)
+function unserializeSkipString( str , runtime )
+{
+	var c ;
+	
+	for ( ; runtime.i < str.length ; runtime.i ++ )
+	{
+		c = str.charCodeAt( runtime.i ) ;
+		
+		// Fastest this way
+		if ( c === 0x22 || c === 0x5c )	// double quote or backslash
+		{
+			runtime.i ++ ;
+			
+			// double-quote
+			if ( c === 0x22 ) { return ; }
+		}
+	}
+	
+	throw new SyntaxError( "Unexpected end" ) ;
+}
+
+
+
+// Skip the current object or array, as fast as possible (partial syntax checking)
+function unserializeSkipNested( str , runtime )
+{
+	var c , depth = 1 ;
+	
+	for ( ; runtime.i < str.length ; runtime.i ++ )
+	{
+		c = str.charCodeAt( runtime.i ) ;
+		
+		// Fastest this way
+		if ( c === 0x5b || c === 0x7b || c === 0x5d || c === 0x7d || c === 0x22 )
+		{
+			//backSlash = false ;
+			
+			if ( c === 0x5b || c === 0x7b )		// opening bracket or brace
+			{
+				depth ++ ;
+				//console.log( "depth++" , depth ) ;
+			}
+			else if ( c === 0x5d || c === 0x7d )	// closing bracket or brace
+			{
+				depth -- ;
+				//console.log( "depth--" , depth ) ;
+				
+				if ( depth === 0 )
+				{
+					runtime.i ++ ;
+					return ;
+				}
+			}
+			else if ( c === 0x22 )	// double-quote
+			{
+				// String are special case, since they can contain bracket and brace that should not be counted by object/array unserializer
+				//console.log( "in double-quote" ) ;
+				runtime.i ++ ;
+				unserializeSkipString( str , runtime ) ;
+				runtime.i -- ;
+			}
+		}
+	}
+	
+	throw new SyntaxError( "Unexpected end" ) ;
+}
+
+
+
