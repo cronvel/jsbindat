@@ -1,0 +1,35 @@
+{
+  "name": "jsbindat",
+  "version": "0.0.0",
+  "description": "Binary data stringifier and parser for Node.js.",
+  "main": "lib/jsbindat.js",
+  "directories": {
+    "test": "test",
+    "bench": "bench"
+  },
+  "dependencies": {
+    "smart-preprocessor": "^0.2.0"
+  },
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "jshint": "^2.9.1",
+    "mocha": "^3.0.0"
+  },
+  "scripts": {
+    "test": "mocha -R dot"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cronvel/jsbindat.git"
+  },
+  "keywords": [
+    "bin",
+    "binary",
+    "serializer"
+  ],
+  "author": "Cédric Ronvel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cronvel/jsbindat/issues"
+  }
+}
