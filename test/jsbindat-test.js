@@ -33,7 +33,9 @@
 
 var fs = require( 'fs' ) ;
 var jsbindat = require( '../lib/jsbindat.js' ) ;
-var expect = require( 'expect.js' ) ;
+//var expect = require( 'expect.js' ) ;
+var doormen = require( 'doormen' ) ;
+var async = require( 'async-kit' ) ;
 
 
 
@@ -43,20 +45,26 @@ var expect = require( 'expect.js' ) ;
 
 
 
-function testStringifyEq( stringify , v )
+function mutualTest( originalData , done )
 {
-	expect( stringify( v ) )
-		.to.be( JSON.stringify( v ) ) ;
-}
-
-function testParseEq( parse , s )
-{
-	expect( JSON.stringify(
-			parse( s )
-		) )
-		.to.be( JSON.stringify(
-			JSON.parse( s )
-		) ) ;
+	var serialize = jsbindat.serializer( {} ) ;
+	var unserialize = jsbindat.unserializer( {} ) ;
+	
+	var stream = fs.createWriteStream( __dirname + '/out.jsdat' ) ;
+	//serialize( undefined , stream ) ;
+	
+	serialize( originalData , stream , function() {
+		stream.end( function() {
+			
+			var stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
+			
+			unserialize( stream , function( data ) {
+				console.log( '\n\n>>> data:' , data , '\n\n' ) ;
+				doormen.equals( data , originalData ) ;
+				done() ;
+			} ) ;
+		} ) ;
+	} ) ;
 }
 
 
@@ -66,31 +74,71 @@ function testParseEq( parse , s )
 
 
 
-describe( "basic features" , function() {
+describe( "basic serialization/unserialization features" , function() {
 	
-	it( "xxx basic test" , function( done ) {
-		
-		var serialize = jsbindat.serializer( {} ) ;
-		var stream = fs.createWriteStream( __dirname + '/out.jsdat' ) ;
-		//serialize( undefined , stream ) ;
-		
-		serialize( 'grigrigredin' , stream , function() {
-		//serialize( 123 , stream , function() {
-			stream.end( done ) ;
-		} ) ;
+	it( "undefined" , function( done ) {
+		mutualTest( undefined , done ) ;
 	} ) ;
 	
-	it( "zzz read test" , function( done ) {
-		
-		var unserialize = jsbindat.unserializer( {} ) ;
-		var stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
-		//serialize( undefined , stream ) ;
-		
-		unserialize( stream , function( data ) {
-			console.log( '\n\n>>> data:' , data , '\n\n' )
-			done() ;
-		} ) ;
+	it( "null" , function( done ) {
+		mutualTest( null , done ) ;
 	} ) ;
+	
+	it( "false" , function( done ) {
+		mutualTest( false , done ) ;
+	} ) ;
+	
+	it( "true" , function( done ) {
+		mutualTest( true , done ) ;
+	} ) ;
+	
+	it( "numbers" , function( done ) {
+		
+		var samples = [
+			0 , 1 , 123 , 123456789 , 0.123 , 123.456 , -1 , -123456789 , -0.123 , -123.456 ,
+			Infinity , -Infinity , NaN ] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "strings" , function( done ) {
+		
+		var samples = [
+			'' ,
+			'a' ,
+			'a string' ,
+			'a'.repeat( 32 ) ,
+			'a'.repeat( 64 ) ,
+			'a'.repeat( 128 ) ,
+			'a'.repeat( 256 ) ,
+			'a'.repeat( 512 ) ,
+			'this is a really really really big big big string!'.repeat( 100 ) ,
+			'this is a really really really big big big string!'.repeat( 2000 ) ,
+			'this is a really really really big big big string!'.repeat( 200000 ) ,
+		] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "arrays" , function( done ) {
+		
+		var samples = [
+			[] ,
+			//[ true , false ] ,
+		] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
 } ) ;
 
 
