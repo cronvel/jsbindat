@@ -74,7 +74,8 @@ describe( "basic features" , function() {
 		var stream = fs.createWriteStream( __dirname + '/out.jsdat' ) ;
 		//serialize( undefined , stream ) ;
 		
-		serialize( true , stream , function() {
+		serialize( 'grigrigredin' , stream , function() {
+		//serialize( 123 , stream , function() {
 			stream.end( done ) ;
 		} ) ;
 	} ) ;
@@ -86,7 +87,7 @@ describe( "basic features" , function() {
 		//serialize( undefined , stream ) ;
 		
 		unserialize( stream , function( data ) {
-			console.log( 'data:' , data )
+			console.log( '\n\n>>> data:' , data , '\n\n' )
 			done() ;
 		} ) ;
 	} ) ;
