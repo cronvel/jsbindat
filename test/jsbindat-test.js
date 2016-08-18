@@ -130,7 +130,7 @@ describe( "basic serialization/unserialization features" , function() {
 		
 		var samples = [
 			[] ,
-			//[ true , false ] ,
+			[ true , false ] ,
 		] ;
 		
 		async.foreach( samples , function( str , foreachCallback ) {
