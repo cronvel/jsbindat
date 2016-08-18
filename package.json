@@ -11,6 +11,7 @@
     "bench": "bench"
   },
   "dependencies": {
+    "nextgen-events": "^0.9.4",
     "smart-preprocessor": "^0.2.0"
   },
   "devDependencies": {
