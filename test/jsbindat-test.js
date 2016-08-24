@@ -131,6 +131,31 @@ describe( "basic serialization/unserialization features" , function() {
 		var samples = [
 			[] ,
 			[ true , false ] ,
+			[ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ]
+		] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "nested arrays" , function( done ) {
+		
+		var samples = [
+			[ [ 1 , 2 , 3 ] , [ true , false ] , [ null , 'a string' , 'another string' ] ]
+		] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "objects" , function( done ) {
+		
+		var samples = [
+			{} ,
 		] ;
 		
 		async.foreach( samples , function( str , foreachCallback ) {
