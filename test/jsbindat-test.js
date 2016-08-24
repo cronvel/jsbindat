@@ -45,20 +45,28 @@ var async = require( 'async-kit' ) ;
 
 
 
-function mutualTest( originalData , done )
+function mutualTest( originalData , serializerOptions , unserializerOptions , done )
 {
+	if ( typeof serializerOptions === 'function' )
+	{
+		done = serializerOptions ;
+		serializerOptions = null ;
+		unserializerOptions = null ;
+	}
+	
 	var serialize = jsbindat.serializer( {} ) ;
 	var unserialize = jsbindat.unserializer( {} ) ;
 	
 	var stream = fs.createWriteStream( __dirname + '/out.jsdat' ) ;
 	//serialize( undefined , stream ) ;
 	
-	serialize( originalData , stream , function() {
+	serialize( originalData , stream , serializerOptions , function() {
 		stream.end( function() {
 			
+			//console.log( '>>> Serialized!' ) ;
 			var stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
 			
-			unserialize( stream , function( data ) {
+			unserialize( stream , unserializerOptions , function( data ) {
 				//console.log( '\n\n>>> data:' , data , '\n\n' ) ;
 				//try {
 				doormen.equals( data , originalData ) ;
@@ -212,6 +220,69 @@ describe( "basic serialization/unserialization features" , function() {
 		
 		async.foreach( samples , function( str , foreachCallback ) {
 			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "instances" , function( done ) {
+		
+		var serializerOptions = {
+			classes: new Map()
+		} ;
+		
+		serializerOptions.classes.set( Date.prototype , function Date( v ) {
+			return v.getTime() ;
+		} ) ;
+		
+		var unserializerOptions = {
+			classes: {
+				Date: function( v ) {
+					return new Date( v ) ;
+				}
+			}
+		} ;
+		
+		var samples = [
+			new Date() ,
+			[ new Date() , new Date() , new Date() ] ,
+			{ a: new Date() , b: new Date() , c: new Date() } ,
+		] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "instances using an object as argument" , function( done ) {
+		
+		var serializerOptions = {
+			classes: new Map()
+		} ;
+		
+		serializerOptions.classes.set( Date.prototype , function Date( v ) {
+			return {
+				timestamp: v.getTime() ,
+				string: v.toString() ,
+			} ;
+		} ) ;
+		
+		var unserializerOptions = {
+			classes: {
+				Date: function( v ) {
+					return new Date( v.timestamp ) ;
+				}
+			}
+		} ;
+		
+		var samples = [
+			new Date() ,
+			[ new Date() , new Date() , new Date() ] ,
+			{ a: new Date() , b: new Date() , c: new Date() } ,
+		] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;

@@ -165,3 +165,68 @@ async.foreach( samples , function( str , foreachCallback ) {
 .exec( done ) ;
 ```
 
+instances.
+
+```js
+var serializerOptions = {
+	classes: new Map()
+} ;
+
+serializerOptions.classes.set( Date.prototype , function Date( v ) {
+	return v.getTime() ;
+} ) ;
+
+var unserializerOptions = {
+	classes: {
+		Date: function( v ) {
+			return new Date( v ) ;
+		}
+	}
+} ;
+
+var samples = [
+	new Date() ,
+	[ new Date() , new Date() , new Date() ] ,
+	{ a: new Date() , b: new Date() , c: new Date() } ,
+] ;
+
+async.foreach( samples , function( str , foreachCallback ) {
+	mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
+} )
+.exec( done ) ;
+```
+
+instances using an object as argument.
+
+```js
+var serializerOptions = {
+	classes: new Map()
+} ;
+
+serializerOptions.classes.set( Date.prototype , function Date( v ) {
+	return {
+		timestamp: v.getTime() ,
+		string: v.toString() ,
+	} ;
+} ) ;
+
+var unserializerOptions = {
+	classes: {
+		Date: function( v ) {
+			return new Date( v.timestamp ) ;
+		}
+	}
+} ;
+
+var samples = [
+	new Date() ,
+	[ new Date() , new Date() , new Date() ] ,
+	{ a: new Date() , b: new Date() , c: new Date() } ,
+] ;
+
+async.foreach( samples , function( str , foreachCallback ) {
+	mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
+} )
+.exec( done ) ;
+```
+
