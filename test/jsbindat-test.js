@@ -59,8 +59,10 @@ function mutualTest( originalData , done )
 			var stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
 			
 			unserialize( stream , function( data ) {
-				console.log( '\n\n>>> data:' , data , '\n\n' ) ;
+				//console.log( '\n\n>>> data:' , data , '\n\n' ) ;
+				//try {
 				doormen.equals( data , originalData ) ;
+				//} catch ( error ) { console.log( data ) ; throw error ; }
 				done() ;
 			} ) ;
 		} ) ;
@@ -143,7 +145,11 @@ describe( "basic serialization/unserialization features" , function() {
 	it( "nested arrays" , function( done ) {
 		
 		var samples = [
-			[ [ 1 , 2 , 3 ] , [ true , false ] , [ null , 'a string' , 'another string' ] ]
+			[
+				[ 1 , 2 , 3 ] ,
+				[ true , false ] ,
+				[ null , 'another string' , 'this is a really really really big big big string!'.repeat( 100 ) , 'a string' ]
+			]
 		] ;
 		
 		async.foreach( samples , function( str , foreachCallback ) {
@@ -154,8 +160,54 @@ describe( "basic serialization/unserialization features" , function() {
 	
 	it( "objects" , function( done ) {
 		
+		var big = 'this is a really really really big big big string!'.repeat( 100 ) ;
+		
 		var samples = [
 			{} ,
+			{ a: 1 , b: 2 } ,
+			{ a: 1 , b: 2 , c: true , d: 'a string' , f: 'big' , abcdefghijklmnopq: true , g: 'gee' } ,
+			{ a: 1 , b: 2 , c: true , d: 'a string' , f: big , abcdefghijklmnopq: true , g: 'gee' }
+		] ;
+		
+		// Big key
+		samples[ samples.length - 1 ][ big ] = big ;
+		samples[ samples.length - 1 ].notbig = 'notbigstring' ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "nested objects" , function( done ) {
+		
+		var samples = [
+			{
+				sub: { a: 1, sub: {} } ,
+				sub2: { b: 2, sub: { sub: { sub: { c: 3 } } } } ,
+				d: 4
+			}
+		] ;
+		
+		async.foreach( samples , function( str , foreachCallback ) {
+			mutualTest( str , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "nested arrays and objects" , function( done ) {
+		
+		var samples = [
+			{
+				sub: [ 1, {} ] ,
+				sub2: [ 2, { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
+				d: 4
+			} ,
+			[
+				[ 1, {} ] ,
+				{ b: 2, sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
+				4
+			]
 		] ;
 		
 		async.foreach( samples , function( str , foreachCallback ) {
