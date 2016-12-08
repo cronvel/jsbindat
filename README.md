@@ -43,8 +43,8 @@ var samples = [
 	0 , 1 , 123 , 123456789 , 0.123 , 123.456 , -1 , -123456789 , -0.123 , -123.456 ,
 	Infinity , -Infinity , NaN ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -66,8 +66,8 @@ var samples = [
 	'this is a really really really big big big string!'.repeat( 200000 ) ,
 ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -81,8 +81,8 @@ var samples = [
 	[ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ]
 ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -98,8 +98,8 @@ var samples = [
 	]
 ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -120,8 +120,8 @@ var samples = [
 samples[ samples.length - 1 ][ big ] = big ;
 samples[ samples.length - 1 ].notbig = 'notbigstring' ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -137,8 +137,8 @@ var samples = [
 	}
 ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -159,8 +159,8 @@ var samples = [
 	]
 ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -190,8 +190,8 @@ var samples = [
 	{ a: new Date() , b: new Date() , c: new Date() } ,
 ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , serializerOptions , unserializerOptions , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
@@ -224,9 +224,43 @@ var samples = [
 	{ a: new Date() , b: new Date() , c: new Date() } ,
 ] ;
 
-async.foreach( samples , function( str , foreachCallback ) {
-	mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , serializerOptions , unserializerOptions , foreachCallback ) ;
 } )
 .exec( done ) ;
+```
+
+relational references (no duplicated object).
+
+```js
+var data = {
+	doc1: { a: 1, b: 2 } ,
+	doc2: { a: 4, b: 7 } ,
+	doc3: {} ,
+	doc4: { mlinks:[] } ,
+	doc5: {} ,
+}
+
+data.circular = data ;
+data.doc1.link = data.doc3 ;
+data.doc2.link = data.doc1 ;
+data.doc5.mlinks = [ data.doc1 , data.doc3 , data ] ;
+
+var serializerOptions = {
+	useRef: true
+} ;
+
+var unserializerOptions = {
+	useRef: true
+} ;
+
+mutualTest( data , serializerOptions , unserializerOptions , function( udata ) {
+	doormen.equals( udata.circular === udata , true ) ;
+	doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
+	doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
+	doormen.equals( udata.doc5.mlinks[ 0 ] === udata.doc1 , true ) ;
+	doormen.equals( udata.doc5.mlinks[ 1 ] === udata.doc3 , true ) ;
+	doormen.equals( udata.doc5.mlinks[ 2 ] === udata , true ) ;
+} , done ) ;
 ```
 
