@@ -240,21 +240,24 @@ describe( "basic serialization/unserialization features" , function() {
 		} )
 		.exec( done ) ;
 	} ) ;
+} ) ;
+
+
+
+describe( "Instances" , function() {
 	
 	it( "instances" , function( done ) {
 		
-		var serializerOptions = {
-			classes: new Map()
-		} ;
-		
-		serializerOptions.classes.set( Date.prototype , function Date( v ) {
-			return v.getTime() ;
-		} ) ;
-		
-		var unserializerOptions = {
+		var options = {
 			classes: {
-				Date: function( v ) {
-					return new Date( v ) ;
+				Date: {
+					prototype: Date.prototype ,
+					constructor: function( arg ) {
+						return new Date( arg ) ;
+					} ,
+					serializer: function( value ) {
+						return [ value.getTime() ] ;
+					}
 				}
 			}
 		} ;
@@ -266,7 +269,7 @@ describe( "basic serialization/unserialization features" , function() {
 		] ;
 		
 		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , serializerOptions , unserializerOptions , foreachCallback ) ;
+			mutualTest( data , options , options , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -303,8 +306,13 @@ describe( "basic serialization/unserialization features" , function() {
 		} )
 		.exec( done ) ;
 	} ) ;
+} ) ;
+
+
+
+describe( "References and relational structures" , function() {
 	
-	it( "relational references (no duplicated object)" , function( done ) {
+	it( "references (no duplicated object)" , function( done ) {
 		
 		var data = {
 			doc1: { a: 1, b: 2 } ,
