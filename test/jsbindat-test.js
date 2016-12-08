@@ -45,13 +45,30 @@ var async = require( 'async-kit' ) ;
 
 
 
-function mutualTest( originalData , serializerOptions , unserializerOptions , done )
+function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb , done )
 {
+	// Manage arguments
 	if ( typeof serializerOptions === 'function' )
 	{
-		done = serializerOptions ;
-		serializerOptions = null ;
-		unserializerOptions = null ;
+		if ( typeof unserializerOptions === 'function' )
+		{
+			extraTestCb = serializerOptions ;
+			done = unserializerOptions ;
+			serializerOptions = null ;
+			unserializerOptions = null ;
+		}
+		else
+		{
+			done = serializerOptions ;
+			extraTestCb = null ;
+			serializerOptions = null ;
+			unserializerOptions = null ;
+		}
+	}
+	else if ( ! done )
+	{
+		done = extraTestCb ;
+		extraTestCb = null ;
 	}
 	
 	var serialize = jsbindat.serializer( {} ) ;
@@ -71,6 +88,9 @@ function mutualTest( originalData , serializerOptions , unserializerOptions , do
 				//try {
 				doormen.equals( data , originalData ) ;
 				//} catch ( error ) { console.log( data ) ; throw error ; }
+				
+				if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
+				
 				done() ;
 			} ) ;
 		} ) ;
@@ -108,8 +128,8 @@ describe( "basic serialization/unserialization features" , function() {
 			0 , 1 , 123 , 123456789 , 0.123 , 123.456 , -1 , -123456789 , -0.123 , -123.456 ,
 			Infinity , -Infinity , NaN ] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -130,8 +150,8 @@ describe( "basic serialization/unserialization features" , function() {
 			'this is a really really really big big big string!'.repeat( 200000 ) ,
 		] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -144,8 +164,8 @@ describe( "basic serialization/unserialization features" , function() {
 			[ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ]
 		] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -160,8 +180,8 @@ describe( "basic serialization/unserialization features" , function() {
 			]
 		] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -181,8 +201,8 @@ describe( "basic serialization/unserialization features" , function() {
 		samples[ samples.length - 1 ][ big ] = big ;
 		samples[ samples.length - 1 ].notbig = 'notbigstring' ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -197,8 +217,8 @@ describe( "basic serialization/unserialization features" , function() {
 			}
 		] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -218,8 +238,8 @@ describe( "basic serialization/unserialization features" , function() {
 			]
 		] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -248,8 +268,8 @@ describe( "basic serialization/unserialization features" , function() {
 			{ a: new Date() , b: new Date() , c: new Date() } ,
 		] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , serializerOptions , unserializerOptions , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
@@ -281,12 +301,29 @@ describe( "basic serialization/unserialization features" , function() {
 			{ a: new Date() , b: new Date() , c: new Date() } ,
 		] ;
 		
-		async.foreach( samples , function( str , foreachCallback ) {
-			mutualTest( str , serializerOptions , unserializerOptions , foreachCallback ) ;
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , serializerOptions , unserializerOptions , foreachCallback ) ;
 		} )
 		.exec( done ) ;
 	} ) ;
 	
+	it( "relational references (avoid to duplicate objects)" , function( done ) {
+		
+		var data = {
+			doc1: { a: 1, b: 2 } ,
+			doc2: { a: 4, b: 7 }
+		}
+		
+		data.doc2.link = data.doc1 ;
+		
+		var serializerOptions = {
+			classes: new Map()
+		} ;
+		
+		mutualTest( data , function( udata ) {
+			doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
+		} , done ) ;
+	} ) ;
 } ) ;
 
 
