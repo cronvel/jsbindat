@@ -71,19 +71,16 @@ function mutualTest( originalData , serializerOptions , unserializerOptions , ex
 		extraTestCb = null ;
 	}
 	
-	var serialize = jsbindat.serializer( serializerOptions ) ;
-	var unserialize = jsbindat.unserializer( unserializerOptions ) ;
-	
 	var stream = fs.createWriteStream( __dirname + '/out.jsdat' ) ;
 	//serialize( undefined , stream ) ;
 	
-	serialize( originalData , stream , serializerOptions , function() {
+	jsbindat.serialize( originalData , stream , serializerOptions , function() {
 		stream.end( function() {
 			
 			//console.log( '>>> Serialized!' ) ;
 			var stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
 			
-			unserialize( stream , unserializerOptions , function( data ) {
+			jsbindat.unserialize( stream , unserializerOptions , function( data ) {
 				//console.log( '\n\n>>> data:' , data , '\n\n' ) ;
 				//try {
 				doormen.equals( data , originalData ) ;
@@ -315,22 +312,14 @@ describe( "basic serialization/unserialization features" , function() {
 			doc3: {} ,
 			doc4: { mlinks:[] } ,
 			doc5: {} ,
-		}
+		} ;
 		
 		data.circular = data ;
 		data.doc1.link = data.doc3 ;
 		data.doc2.link = data.doc1 ;
 		data.doc5.mlinks = [ data.doc1 , data.doc3 , data ] ;
 		
-		var serializerOptions = {
-			useRef: true
-		} ;
-		
-		var unserializerOptions = {
-			useRef: true
-		} ;
-		
-		mutualTest( data , serializerOptions , unserializerOptions , function( udata ) {
+		mutualTest( data , function( udata ) {
 			doormen.equals( udata.circular === udata , true ) ;
 			doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
 			doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
@@ -340,6 +329,5 @@ describe( "basic serialization/unserialization features" , function() {
 		} , done ) ;
 	} ) ;
 } ) ;
-
 
 

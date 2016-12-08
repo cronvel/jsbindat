@@ -231,22 +231,14 @@ var data = {
 	doc3: {} ,
 	doc4: { mlinks:[] } ,
 	doc5: {} ,
-}
+} ;
 
 data.circular = data ;
 data.doc1.link = data.doc3 ;
 data.doc2.link = data.doc1 ;
 data.doc5.mlinks = [ data.doc1 , data.doc3 , data ] ;
 
-var serializerOptions = {
-	useRef: true
-} ;
-
-var unserializerOptions = {
-	useRef: true
-} ;
-
-mutualTest( data , serializerOptions , unserializerOptions , function( udata ) {
+mutualTest( data , function( udata ) {
 	doormen.equals( udata.circular === udata , true ) ;
 	doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
 	doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
