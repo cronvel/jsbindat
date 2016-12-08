@@ -248,6 +248,31 @@ describe( "Instances" , function() {
 	
 	it( "instances" , function( done ) {
 		
+		function ZeClass()
+		{
+			this.a = 4 ;
+			this.b = 7 ;
+		}
+		
+		var options = {
+			classes: {
+				ZeClass: {
+					prototype: ZeClass.prototype
+				}
+			}
+		} ;
+		
+		var data = {
+			v: new ZeClass()
+		} ;
+		
+		mutualTest( data , options , options , function( udata ) {
+			console.log( 'udata: ' , udata ) ;
+		} , done ) ;
+	} ) ;
+	
+	it( "constructed instances" , function( done ) {
+		
 		var options = {
 			classes: {
 				Date: {
@@ -274,7 +299,7 @@ describe( "Instances" , function() {
 		.exec( done ) ;
 	} ) ;
 	
-	it( "instances using an object as argument" , function( done ) {
+	it( "constructed instances using an object as argument" , function( done ) {
 		
 		var serializerOptions = {
 			classes: new Map()
