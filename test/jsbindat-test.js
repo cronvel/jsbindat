@@ -33,6 +33,7 @@
 
 var fs = require( 'fs' ) ;
 var jsbindat = require( '../lib/jsbindat.js' ) ;
+var ClassMap = jsbindat.ClassMap ;
 //var expect = require( 'expect.js' ) ;
 var doormen = require( 'doormen' ) ;
 var async = require( 'async-kit' ) ;
@@ -266,11 +267,11 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classes: {
+			classMap: new ClassMap( {
 				ZeClass: {
 					prototype: ZeClass.prototype
 				}
-			}
+			} )
 		} ;
 		
 		var data = {
@@ -296,7 +297,7 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classes: {
+			classMap: ClassMap.create( {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
@@ -304,7 +305,7 @@ describe( "Instances" , function() {
 					} ,
 					newConstructor: ZeClass
 				}
-			}
+			} )
 		} ;
 		
 		var data = {
@@ -335,7 +336,7 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classes: {
+			classMap: ClassMap.create( {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
@@ -343,7 +344,7 @@ describe( "Instances" , function() {
 					} ,
 					newConstructor: ZeClass
 				}
-			}
+			} )
 		} ;
 		
 		var data = {
@@ -372,7 +373,7 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classes: {
+			classMap: ClassMap.create( {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
@@ -380,7 +381,7 @@ describe( "Instances" , function() {
 					} ,
 					constructor: function() { return new ZeClass() ; }
 				}
-			}
+			} )
 		} ;
 		
 		var data = {
@@ -411,7 +412,7 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classes: {
+			classMap: ClassMap.create( {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
@@ -419,7 +420,7 @@ describe( "Instances" , function() {
 					} ,
 					constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 				}
-			}
+			} )
 		} ;
 		
 		var data = {
@@ -440,7 +441,7 @@ describe( "Instances" , function() {
 	it( "constructed instances, test the Date object" , function( done ) {
 		
 		var options = {
-			classes: {
+			classMap: ClassMap.create( {
 				Date: {
 					prototype: Date.prototype ,
 					constructor: function( arg ) {
@@ -450,7 +451,7 @@ describe( "Instances" , function() {
 						return [ value.getTime() ] ;
 					}
 				}
-			}
+			} )
 		} ;
 		
 		var samples = [
@@ -510,11 +511,11 @@ describe( "References and relational structures" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classes: {
+			classMap: ClassMap.create( {
 				ZeClass: {
 					prototype: ZeClass.prototype
 				}
-			}
+			} )
 		} ;
 		
 		var data = {
@@ -554,7 +555,7 @@ describe( "References and relational structures" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classes: {
+			classMap: ClassMap.create( {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
@@ -568,7 +569,7 @@ describe( "References and relational structures" , function() {
 					} ,
 					constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 				}
-			}
+			} )
 		} ;
 		
 		var data = {

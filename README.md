@@ -181,11 +181,11 @@ function ZeClass()
 ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 
 var options = {
-	classes: {
+	classMap: new ClassMap( {
 		ZeClass: {
 			prototype: ZeClass.prototype
 		}
-	}
+	} )
 } ;
 
 var data = {
@@ -212,7 +212,7 @@ function ZeClass()
 ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 
 var options = {
-	classes: {
+	classMap: ClassMap.create( {
 		ZeClass: {
 			prototype: ZeClass.prototype ,
 			serializer: function( obj ) {
@@ -220,7 +220,7 @@ var options = {
 			} ,
 			newConstructor: ZeClass
 		}
-	}
+	} )
 } ;
 
 var data = {
@@ -252,7 +252,7 @@ function ZeClass( arg1 , arg2 )
 ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 
 var options = {
-	classes: {
+	classMap: ClassMap.create( {
 		ZeClass: {
 			prototype: ZeClass.prototype ,
 			serializer: function( obj ) {
@@ -260,7 +260,7 @@ var options = {
 			} ,
 			newConstructor: ZeClass
 		}
-	}
+	} )
 } ;
 
 var data = {
@@ -290,7 +290,7 @@ function ZeClass()
 ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 
 var options = {
-	classes: {
+	classMap: ClassMap.create( {
 		ZeClass: {
 			prototype: ZeClass.prototype ,
 			serializer: function( obj ) {
@@ -298,7 +298,7 @@ var options = {
 			} ,
 			constructor: function() { return new ZeClass() ; }
 		}
-	}
+	} )
 } ;
 
 var data = {
@@ -330,7 +330,7 @@ function ZeClass( arg1 , arg2 )
 ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 
 var options = {
-	classes: {
+	classMap: ClassMap.create( {
 		ZeClass: {
 			prototype: ZeClass.prototype ,
 			serializer: function( obj ) {
@@ -338,7 +338,7 @@ var options = {
 			} ,
 			constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 		}
-	}
+	} )
 } ;
 
 var data = {
@@ -360,7 +360,7 @@ constructed instances, test the Date object.
 
 ```js
 var options = {
-	classes: {
+	classMap: ClassMap.create( {
 		Date: {
 			prototype: Date.prototype ,
 			constructor: function( arg ) {
@@ -370,7 +370,7 @@ var options = {
 				return [ value.getTime() ] ;
 			}
 		}
-	}
+	} )
 } ;
 
 var samples = [
@@ -429,11 +429,11 @@ function ZeClass()
 ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 
 var options = {
-	classes: {
+	classMap: ClassMap.create( {
 		ZeClass: {
 			prototype: ZeClass.prototype
 		}
-	}
+	} )
 } ;
 
 var data = {
@@ -474,7 +474,7 @@ function ZeClass()
 ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 
 var options = {
-	classes: {
+	classMap: ClassMap.create( {
 		ZeClass: {
 			prototype: ZeClass.prototype ,
 			serializer: function( obj ) {
@@ -488,7 +488,7 @@ var options = {
 			} ,
 			constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 		}
-	}
+	} )
 } ;
 
 var data = {
