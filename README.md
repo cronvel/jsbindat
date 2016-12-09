@@ -8,6 +8,8 @@ Early alpha.
 
 # TOC
    - [basic serialization/unserialization features](#basic-serializationunserialization-features)
+   - [Instances](#instances)
+   - [References and relational structures](#references-and-relational-structures)
 <a name=""></a>
  
 <a name="basic-serializationunserialization-features"></a>
@@ -165,21 +167,208 @@ async.foreach( samples , function( data , foreachCallback ) {
 .exec( done ) ;
 ```
 
-instances.
+<a name="instances"></a>
+# Instances
+instances without constructor.
 
 ```js
-var serializerOptions = {
-	classes: new Map()
+function ZeClass()
+{
+	this.a = 4 ;
+	this.b = 7 ;
+}
+
+ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+
+var options = {
+	classes: {
+		ZeClass: {
+			prototype: ZeClass.prototype
+		}
+	}
 } ;
 
-serializerOptions.classes.set( Date.prototype , function Date( v ) {
-	return v.getTime() ;
-} ) ;
+var data = {
+	v: new ZeClass()
+} ;
 
-var unserializerOptions = {
+//console.log( 'data: ' , data ) ;
+
+mutualTest( data , options , options , function( udata ) {
+	//console.log( 'udata: ' , udata ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+} , done ) ;
+```
+
+constructed instances, using a 'new' type of constructor.
+
+```js
+function ZeClass()
+{
+	this.a = 4 ;
+	this.b = 7 ;
+}
+
+ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+
+var options = {
 	classes: {
-		Date: function( v ) {
-			return new Date( v ) ;
+		ZeClass: {
+			prototype: ZeClass.prototype ,
+			serializer: function( obj ) {
+				return [ undefined , obj ] ;
+			} ,
+			newConstructor: ZeClass
+		}
+	}
+} ;
+
+var data = {
+	v: new ZeClass() ,
+	v2: new ZeClass()
+} ;
+
+data.v2.inc() ;
+
+//console.log( 'data: ' , deb( data ) ) ;
+
+mutualTest( data , options , options , function( udata ) {
+	//console.log( 'udata: ' , deb( udata ) ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+} , done ) ;
+```
+
+constructed instances, using a 'new' type of constructor with arguments.
+
+```js
+function ZeClass( arg1 , arg2 )
+{
+	this.arg1 = arg1 ;
+	this.arg2 = arg2 ;
+	this.a = 4 ;
+	this.b = 7 ;
+}
+
+ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+
+var options = {
+	classes: {
+		ZeClass: {
+			prototype: ZeClass.prototype ,
+			serializer: function( obj ) {
+				return [ [ obj.arg1 , obj.arg2 ] , { a: obj.a , b: obj.b } ] ;
+			} ,
+			newConstructor: ZeClass
+		}
+	}
+} ;
+
+var data = {
+	v: new ZeClass( "arg1" , 2 ) ,
+	v2: new ZeClass( { arg: 1 } , [ 2 ] )
+} ;
+
+data.v2.inc() ;
+
+//console.log( 'data: ' , deb( data ) ) ;
+
+mutualTest( data , options , options , function( udata ) {
+	//console.log( 'udata: ' , deb( udata ) ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+} , done ) ;
+```
+
+constructed instances, using a regular function as constructor.
+
+```js
+function ZeClass()
+{
+	this.a = 4 ;
+	this.b = 7 ;
+}
+
+ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+
+var options = {
+	classes: {
+		ZeClass: {
+			prototype: ZeClass.prototype ,
+			serializer: function( obj ) {
+				return [ undefined , obj ] ;
+			} ,
+			constructor: function() { return new ZeClass() ; }
+		}
+	}
+} ;
+
+var data = {
+	v: new ZeClass() ,
+	v2: new ZeClass()
+} ;
+
+data.v2.inc() ;
+
+//console.log( 'data: ' , deb( data ) ) ;
+
+mutualTest( data , options , options , function( udata ) {
+	//console.log( 'udata: ' , deb( udata ) ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+} , done ) ;
+```
+
+constructed instances, using a regular function as constructor, with arguments.
+
+```js
+function ZeClass( arg1 , arg2 )
+{
+	this.arg1 = arg1 ;
+	this.arg2 = arg2 ;
+	this.a = 4 ;
+	this.b = 7 ;
+}
+
+ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+
+var options = {
+	classes: {
+		ZeClass: {
+			prototype: ZeClass.prototype ,
+			serializer: function( obj ) {
+				return [ [ obj.arg1 , obj.arg2 ] , { a: obj.a , b: obj.b } ] ;
+			} ,
+			constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
+		}
+	}
+} ;
+
+var data = {
+	v: new ZeClass( "arg1" , 2 ) ,
+	v2: new ZeClass( { arg: 1 } , [ 2 ] )
+} ;
+
+data.v2.inc() ;
+
+//console.log( 'data: ' , deb( data ) ) ;
+
+mutualTest( data , options , options , function( udata ) {
+	//console.log( 'udata: ' , deb( udata ) ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+} , done ) ;
+```
+
+constructed instances, test the Date object.
+
+```js
+var options = {
+	classes: {
+		Date: {
+			prototype: Date.prototype ,
+			constructor: function( arg ) {
+				return new Date( arg ) ;
+			} ,
+			serializer: function( value ) {
+				return [ value.getTime() ] ;
+			}
 		}
 	}
 } ;
@@ -190,47 +379,19 @@ var samples = [
 	{ a: new Date() , b: new Date() , c: new Date() } ,
 ] ;
 
+//console.log( 'samples: ' , deb( samples ) ) ;
+
 async.foreach( samples , function( data , foreachCallback ) {
-	mutualTest( data , serializerOptions , unserializerOptions , foreachCallback ) ;
+	mutualTest( data , options , options , function( udata ) {
+		//console.log( 'udata: ' , deb( udata ) ) ;
+	} , foreachCallback ) ;
 } )
 .exec( done ) ;
 ```
 
-instances using an object as argument.
-
-```js
-var serializerOptions = {
-	classes: new Map()
-} ;
-
-serializerOptions.classes.set( Date.prototype , function Date( v ) {
-	return {
-		timestamp: v.getTime() ,
-		string: v.toString() ,
-	} ;
-} ) ;
-
-var unserializerOptions = {
-	classes: {
-		Date: function( v ) {
-			return new Date( v.timestamp ) ;
-		}
-	}
-} ;
-
-var samples = [
-	new Date() ,
-	[ new Date() , new Date() , new Date() ] ,
-	{ a: new Date() , b: new Date() , c: new Date() } ,
-] ;
-
-async.foreach( samples , function( data , foreachCallback ) {
-	mutualTest( data , serializerOptions , unserializerOptions , foreachCallback ) ;
-} )
-.exec( done ) ;
-```
-
-relational references (no duplicated object).
+<a name="references-and-relational-structures"></a>
+# References and relational structures
+references (no duplicated object).
 
 ```js
 var data = {
@@ -253,6 +414,106 @@ mutualTest( data , function( udata ) {
 	doormen.equals( udata.doc5.mlinks[ 0 ] === udata.doc1 , true ) ;
 	doormen.equals( udata.doc5.mlinks[ 1 ] === udata.doc3 , true ) ;
 	doormen.equals( udata.doc5.mlinks[ 2 ] === udata , true ) ;
+} , done ) ;
+```
+
+instances without constructor self referencing itself and other instances.
+
+```js
+function ZeClass()
+{
+	this.a = 4 ;
+	this.b = 7 ;
+}
+
+ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+
+var options = {
+	classes: {
+		ZeClass: {
+			prototype: ZeClass.prototype
+		}
+	}
+} ;
+
+var data = {
+	v: new ZeClass() ,
+	v2: new ZeClass()
+} ;
+
+data.v2.inc() ;
+data.v.root = data ;
+data.v.self = data.v ;
+data.v.v2 = data.v2 ;
+data.v2.v = data.v ;
+data.v3 = data.v2 ;
+
+//console.log( 'data: ' , deb( data ) ) ;
+
+mutualTest( data , options , options , function( udata ) {
+	//console.log( 'udata: ' , deb( udata ) ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
+	doormen.equals( udata.v.root === udata , true ) ;
+	doormen.equals( udata.v.self === udata.v , true ) ;
+	doormen.equals( udata.v.v2 === udata.v2 , true ) ;
+	doormen.equals( udata.v2.v === udata.v , true ) ;
+	doormen.equals( udata.v3 === udata.v2 , true ) ;
+} , done ) ;
+```
+
+instances with constructor self referencing itself and other instances.
+
+```js
+function ZeClass()
+{
+	this.a = 4 ;
+	this.b = 7 ;
+}
+
+ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+
+var options = {
+	classes: {
+		ZeClass: {
+			prototype: ZeClass.prototype ,
+			serializer: function( obj ) {
+				
+				// Back up anything except constructor args
+				var clone = Object.assign( {} , obj ) ;
+				delete clone.arg1 ;
+				delete clone.arg2 ;
+				
+				return [ [ obj.arg1 , obj.arg2 ] , clone ] ;
+			} ,
+			constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
+		}
+	}
+} ;
+
+var data = {
+	v: new ZeClass() ,
+	v2: new ZeClass()
+} ;
+
+data.v2.inc() ;
+data.v.root = data ;
+data.v.self = data.v ;
+data.v.v2 = data.v2 ;
+data.v2.v = data.v ;
+data.v3 = data.v2 ;
+
+//console.log( 'data: ' , deb( data ) ) ;
+
+mutualTest( data , options , options , function( udata ) {
+	//console.log( 'udata: ' , deb( udata ) ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+	doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
+	doormen.equals( udata.v.root === udata , true ) ;
+	doormen.equals( udata.v.self === udata.v , true ) ;
+	doormen.equals( udata.v.v2 === udata.v2 , true ) ;
+	doormen.equals( udata.v2.v === udata.v , true ) ;
+	doormen.equals( udata.v3 === udata.v2 , true ) ;
 } , done ) ;
 ```
 
