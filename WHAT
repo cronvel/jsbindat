@@ -1,5 +1,0 @@
-
-Un serializer binaire, inspiré par Json-kit.
-
-Nécessite d'abord un module "stream-buffer", permettant de faire des writeUInt8(), write*() sur un stream, bufferize et envoie
-au bon moment.
