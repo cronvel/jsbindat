@@ -4,7 +4,8 @@ var jsbindat = require( '../lib/jsbindat.js' ) ;
 
 var string = require( 'string-kit' ) ;
 
-stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
+var stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
+
 jsbindat.unserialize( stream , {} , function( udata ) {
 	
 	console.log( "After serialize/unserialize:\n" + string.inspect( { style: "color" , depth: Infinity } , udata ) ) ;
