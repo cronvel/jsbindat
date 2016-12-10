@@ -167,6 +167,12 @@ async.foreach( samples , function( data , foreachCallback ) {
 .exec( done ) ;
 ```
 
+real-world test.
+
+```js
+mutualTest( require( '../sample/sample1.json' ) , done ) ;
+```
+
 <a name="instances"></a>
 # Instances
 instances without constructor.

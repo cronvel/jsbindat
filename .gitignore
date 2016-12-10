@@ -1,6 +1,7 @@
 # Specific #
 ############
 
+out.jsdat
 *.local.*
 *.local
 *.log

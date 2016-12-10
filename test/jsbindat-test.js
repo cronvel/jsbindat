@@ -250,6 +250,11 @@ describe( "basic serialization/unserialization features" , function() {
 		} )
 		.exec( done ) ;
 	} ) ;
+	
+	it( "real-world test" , function( done ) {
+		
+		mutualTest( require( '../sample/sample1.json' ) , done ) ;
+	} ) ;
 } ) ;
 
 
