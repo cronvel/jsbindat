@@ -40,6 +40,13 @@
   "bugs": {
     "url": "https://github.com/cronvel/jsbindat/issues"
   },
+  "config": {
+    "tea-time": {
+      "coverDir": [
+        "lib"
+      ]
+    }
+  },
   "copyright": {
     "title": "JS Binary Data",
     "years": [
