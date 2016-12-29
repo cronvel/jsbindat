@@ -18,12 +18,18 @@ Supports:
 
 ### Serializing to a file example
 
-```
+```js
 var stream = fs.createWriteStream( 'path/to/my/file.jsdat' ) ;
 
-jsbindat.serialize( data , stream , {} , function() {
+jsbindat.serialize( stream , data , function() {
 	stream.end() ;
 } ) ;
+```
+
+... or just:
+
+```js
+jsbindat.writeFile( 'path/to/my/file.jsdat' , data ) ;
 ```
 
 
@@ -33,9 +39,17 @@ jsbindat.serialize( data , stream , {} , function() {
 ```
 var stream = fs.createReadStream( 'path/to/my/file.jsdat' ) ;
 
-jsbindat.unserialize( stream , {} , function( data ) {
-	
-	// Do something with the 
+jsbindat.unserialize( stream , function( data ) {
+	stream.close() ;
+	// Do something with the data
+} ) ;
+```
+
+... or just:
+
+```js
+jsbindat.readFile( 'path/to/my/file.jsdat' , function( data ) {
+	// Do something with the data
 } ) ;
 ```
 

@@ -73,25 +73,18 @@ function mutualTest( originalData , serializerOptions , unserializerOptions , ex
 		extraTestCb = null ;
 	}
 	
-	var stream = fs.createWriteStream( __dirname + '/out.jsdat' ) ;
-	//serialize( undefined , stream ) ;
-	
-	jsbindat.serialize( originalData , stream , serializerOptions , function() {
-		stream.end( function() {
+	jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions , function() {
 			
-			//console.log( '>>> Serialized!' ) ;
-			var stream = fs.createReadStream( __dirname + '/out.jsdat' ) ;
+		jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions , function( data ) {
 			
-			jsbindat.unserialize( stream , unserializerOptions , function( data ) {
-				//console.log( '\n\n>>> data:' , data , '\n\n' ) ;
-				//try {
-				doormen.equals( data , originalData ) ;
-				//} catch ( error ) { console.log( data ) ; throw error ; }
-				
-				if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
-				
-				done() ;
-			} ) ;
+			//console.log( '\n\n>>> data:' , data , '\n\n' ) ;
+			//try {
+			doormen.equals( data , originalData ) ;
+			//} catch ( error ) { console.log( data ) ; throw error ; }
+			
+			if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
+			
+			done() ;
 		} ) ;
 	} ) ;
 }
