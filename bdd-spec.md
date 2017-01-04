@@ -81,6 +81,22 @@ async.foreach( samples , function( data , foreachCallback ) {
 .exec( done ) ;
 ```
 
+ES6 Set.
+
+```js
+var set = new Set() ;
+
+set.add( { a: 1 } ) ;
+set.add( { b: 2 } ) ;
+
+var samples = [ new Set() , set ] ;
+
+async.foreach( samples , function( data , foreachCallback ) {
+	mutualTest( data , foreachCallback ) ;
+} )
+.exec( done ) ;
+```
+
 nested arrays.
 
 ```js

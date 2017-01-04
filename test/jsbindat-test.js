@@ -80,6 +80,14 @@ function mutualTest( originalData , serializerOptions , unserializerOptions , ex
 			//console.log( '\n\n>>> data:' , data , '\n\n' ) ;
 			//try {
 			doormen.equals( data , originalData ) ;
+			
+			if ( originalData && typeof originalData === 'object' )
+			{
+				//console.log( Object.getPrototypeOf( data ).constructor.name ) ;
+				//console.log( data ) ;
+				doormen.equals( Object.getPrototypeOf( data ) === Object.getPrototypeOf( originalData ) , true ) ;
+			}
+			
 			//} catch ( error ) { console.log( data ) ; throw error ; }
 			
 			if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
@@ -163,6 +171,21 @@ describe( "basic serialization/unserialization features" , function() {
 			[ true , false ] ,
 			[ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ]
 		] ;
+		
+		async.foreach( samples , function( data , foreachCallback ) {
+			mutualTest( data , foreachCallback ) ;
+		} )
+		.exec( done ) ;
+	} ) ;
+	
+	it( "ES6 Set" , function( done ) {
+		
+		var set = new Set() ;
+		
+		set.add( { a: 1 } ) ;
+		set.add( { b: 2 } ) ;
+		
+		var samples = [ new Set() , set ] ;
 		
 		async.foreach( samples , function( data , foreachCallback ) {
 			mutualTest( data , foreachCallback ) ;
