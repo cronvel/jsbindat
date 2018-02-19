@@ -112,6 +112,16 @@ function deb( v )
 
 
 
+describe( "..." , function() {
+	
+	it( "zzz" , async function( done ) {
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , 3 ) ;
+		done() ;
+	} ) ;
+} ) ;
+
+
+
 describe( "basic serialization/unserialization features" , function() {
 	
 	it( "undefined" , function( done ) {
