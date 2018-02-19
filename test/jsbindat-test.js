@@ -37,6 +37,7 @@ var ClassMap = jsbindat.ClassMap ;
 //var expect = require( 'expect.js' ) ;
 var doormen = require( 'doormen' ) ;
 var async = require( 'async-kit' ) ;
+var Promise = require( 'seventh' ) ;
 var string = require( 'string-kit' ) ;
 
 
@@ -47,54 +48,51 @@ var string = require( 'string-kit' ) ;
 
 
 
-function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb , done )
+async function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb )
 {
+	var data ;
+	
 	// Manage arguments
 	if ( typeof serializerOptions === 'function' )
 	{
 		if ( typeof unserializerOptions === 'function' )
 		{
 			extraTestCb = serializerOptions ;
-			done = unserializerOptions ;
 			serializerOptions = null ;
 			unserializerOptions = null ;
 		}
 		else
 		{
-			done = serializerOptions ;
 			extraTestCb = null ;
 			serializerOptions = null ;
 			unserializerOptions = null ;
 		}
 	}
-	else if ( ! done )
-	{
-		done = extraTestCb ;
-		extraTestCb = null ;
+	
+	try {
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
+		
+		data = await jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions ) ;
+		console.log( '\n\n>>> data:' , data , '\n\n' ) ;
+		
+		doormen.equals( data , originalData ) ;
+		
+		if ( originalData && typeof originalData === 'object' )
+		{
+			//console.log( Object.getPrototypeOf( data ).constructor.name ) ;
+			//console.log( data ) ;
+			doormen.equals( Object.getPrototypeOf( data ) === Object.getPrototypeOf( originalData ) , true ) ;
+		}
+		
+	}
+	catch ( error ) {
+		console.log( "Error!" , error ) ;
+		console.log( data ) ;
+		throw error ;
+		return ;
 	}
 	
-	jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions , function() {
-			
-		jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions , function( data ) {
-			
-			//console.log( '\n\n>>> data:' , data , '\n\n' ) ;
-			//try {
-			doormen.equals( data , originalData ) ;
-			
-			if ( originalData && typeof originalData === 'object' )
-			{
-				//console.log( Object.getPrototypeOf( data ).constructor.name ) ;
-				//console.log( data ) ;
-				doormen.equals( Object.getPrototypeOf( data ) === Object.getPrototypeOf( originalData ) , true ) ;
-			}
-			
-			//} catch ( error ) { console.log( data ) ; throw error ; }
-			
-			if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
-			
-			done() ;
-		} ) ;
-	} ) ;
+	if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
 }
 
 
@@ -112,44 +110,47 @@ function deb( v )
 
 
 
-describe( "..." , function() {
-	
-	it( "zzz" , async function( done ) {
-		await jsbindat.writeFile( __dirname + '/out.jsdat' , 3 ) ;
-		done() ;
-	} ) ;
-} ) ;
-
-
-
 describe( "basic serialization/unserialization features" , function() {
 	
 	it( "undefined" , function( done ) {
-		mutualTest( undefined , done ) ;
+		mutualTest( undefined ).then( done , done ) ;
 	} ) ;
 	
 	it( "null" , function( done ) {
-		mutualTest( null , done ) ;
+		mutualTest( null ).then( done , done ) ;
 	} ) ;
 	
 	it( "false" , function( done ) {
-		mutualTest( false , done ) ;
+		mutualTest( false ).then( done , done ) ;
 	} ) ;
 	
 	it( "true" , function( done ) {
-		mutualTest( true , done ) ;
+		mutualTest( true ).then( done , done ) ;
 	} ) ;
 	
-	it( "numbers" , function( done ) {
+	it( "numbers" , async function( done ) {
 		
-		var samples = [
-			0 , 1 , 123 , 123456789 , 0.123 , 123.456 , -1 , -123456789 , -0.123 , -123.456 ,
-			Infinity , -Infinity , NaN ] ;
+		try {
+			await mutualTest( 0 ) ;
+			await mutualTest( 1 ) ;
+			await mutualTest( 123 ) ;
+			await mutualTest( 123456789 ) ;
+			await mutualTest( 0.123 ) ;
+			await mutualTest( 123.456 ) ;
+			await mutualTest( -1 ) ;
+			await mutualTest( -123456789 ) ;
+			await mutualTest( -0.123 ) ;
+			await mutualTest( -123.456 ) ;
+			await mutualTest( NaN ) ;
+			await mutualTest( Infinity ) ;
+			await mutualTest( -Infinity ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
 		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		done() ;
 	} ) ;
 	
 	it( "strings" , function( done ) {
@@ -279,7 +280,7 @@ describe( "basic serialization/unserialization features" , function() {
 	
 	it( "real-world test" , function( done ) {
 		
-		mutualTest( require( '../sample/sample1.json' ) , done ) ;
+		mutualTest( require( '../sample/sample1.json' ) ).then( done , done ) ;
 	} ) ;
 } ) ;
 
