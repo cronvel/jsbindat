@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "seventh": "^0.6.4",
-    "stream-kit": "^0.1.0"
+    "stream-kit": "^0.2.0"
   },
   "devDependencies": {
     "doormen": "^0.6.7",
