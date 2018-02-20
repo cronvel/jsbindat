@@ -1,7 +1,7 @@
 /*
 	JS Binary Data
 	
-	Copyright (c) 2016 Cédric Ronvel
+	Copyright (c) 2016 - 2018 Cédric Ronvel
 	
 	The MIT License (MIT)
 	
@@ -40,7 +40,7 @@ var string = require( 'string-kit' ) ;
 
 
 
-			/* Helpers */
+/* Helpers */
 
 
 
@@ -49,8 +49,8 @@ function deb( title , v ) {
 		v = title ;
 		title = null ;
 	}
-	
-	console.log( 
+
+	console.log(
 		( title ? title + ': ' : '' ) +
 		string.inspect( { style: 'color' , depth: 5 } , v )
 	) ;
@@ -60,39 +60,35 @@ function deb( title , v ) {
 
 async function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb ) {
 	var data ;
-	
+
 	// Manage arguments
-	if ( typeof serializerOptions === 'function' )
-	{
-		if ( typeof unserializerOptions === 'function' )
-		{
+	if ( typeof serializerOptions === 'function' ) {
+		if ( typeof unserializerOptions === 'function' ) {
 			extraTestCb = serializerOptions ;
 			serializerOptions = null ;
 			unserializerOptions = null ;
 		}
-		else
-		{
+		else {
 			extraTestCb = null ;
 			serializerOptions = null ;
 			unserializerOptions = null ;
 		}
 	}
-	
+
 	try {
 		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
-		
+
 		data = await jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions ) ;
 		//deb( 'data' , data ) ;
-		
+
 		doormen.equals( data , originalData ) ;
-		
-		if ( originalData && typeof originalData === 'object' )
-		{
+
+		if ( originalData && typeof originalData === 'object' ) {
 			//console.log( Object.getPrototypeOf( data ).constructor.name ) ;
 			//console.log( data ) ;
 			doormen.equals( Object.getPrototypeOf( data ) === Object.getPrototypeOf( originalData ) , true ) ;
 		}
-		
+
 	}
 	catch ( error ) {
 		//console.log( "Error!" , error ) ;
@@ -101,7 +97,7 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 		throw error ;
 		return ;
 	}
-	
+
 	if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
 }
 
@@ -109,30 +105,30 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 
 
 
-			/* Tests */
+/* Tests */
 
 
 
-describe( "basic serialization/unserialization features" , function() {
-	
-	it( "undefined" , function( done ) {
+describe( "basic serialization/unserialization features" , () => {
+
+	it( "undefined" , ( done ) => {
 		mutualTest( undefined ).then( done , done ) ;
 	} ) ;
-	
-	it( "null" , function( done ) {
+
+	it( "null" , ( done ) => {
 		mutualTest( null ).then( done , done ) ;
 	} ) ;
-	
-	it( "false" , function( done ) {
+
+	it( "false" , ( done ) => {
 		mutualTest( false ).then( done , done ) ;
 	} ) ;
-	
-	it( "true" , function( done ) {
+
+	it( "true" , ( done ) => {
 		mutualTest( true ).then( done , done ) ;
 	} ) ;
-	
-	it( "numbers" , async function( done ) {
-		
+
+	it( "numbers" , async( done ) => {
+
 		try {
 			await mutualTest( 0 ) ;
 			await mutualTest( 1 ) ;
@@ -152,12 +148,12 @@ describe( "basic serialization/unserialization features" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "strings" , async function( done ) {
-		
+
+	it( "strings" , async( done ) => {
+
 		try {
 			await mutualTest( '' ) ;
 			await mutualTest( 'a' ) ;
@@ -177,12 +173,12 @@ describe( "basic serialization/unserialization features" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "arrays" , async function( done ) {
-		
+
+	it( "arrays" , async( done ) => {
+
 		try {
 			await mutualTest( [] ) ;
 			await mutualTest( [ true , false ] ) ;
@@ -192,22 +188,22 @@ describe( "basic serialization/unserialization features" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "ES6 Set" , async function( done ) {
-		
+
+	it( "ES6 Set" , async( done ) => {
+
 		var set ;
-		
+
 		try {
 			await mutualTest( new Set() ) ;
-			
+
 			set = new Set() ;
 			set.add( 1 ) ;
 			set.add( "bob" ) ;
 			await mutualTest( set ) ;
-			
+
 			set = new Set() ;
 			set.add( { a: 1 } ) ;
 			set.add( { b: 2 } ) ;
@@ -217,12 +213,12 @@ describe( "basic serialization/unserialization features" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "nested arrays" , async function( done ) {
-		
+
+	it( "nested arrays" , async( done ) => {
+
 		try {
 			await mutualTest( [
 				[ 1 , 2 , 3 ] ,
@@ -234,38 +230,42 @@ describe( "basic serialization/unserialization features" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "objects" , async function( done ) {
-		
+
+	it( "objects" , async( done ) => {
+
 		var big = 'this is a really really really big big big string!'.repeat( 100 ) ;
-		
-		var bigKeyObject = { a: 1 , b: 2 , c: true , d: 'a string' , f: big , abcdefghijklmnopq: true , g: 'gee' } ;
+
+		var bigKeyObject = {
+			a: 1 , b: 2 , c: true , d: 'a string' , f: big , abcdefghijklmnopq: true , g: 'gee'
+		} ;
 		bigKeyObject[ big ] = big ;
 		bigKeyObject.notbig = 'notbigstring' ;
-		
+
 		try {
 			await mutualTest( {} ) ;
 			await mutualTest( { a: 1 , b: 2 } ) ;
-			await mutualTest( { a: 1 , b: 2 , c: true , d: 'a string' , f: 'big' , abcdefghijklmnopq: true , g: 'gee' } ) ;
+			await mutualTest( {
+				a: 1 , b: 2 , c: true , d: 'a string' , f: 'big' , abcdefghijklmnopq: true , g: 'gee'
+			} ) ;
 			await mutualTest( bigKeyObject ) ;
 		}
 		catch ( error ) {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "nested objects" , async function( done ) {
-		
+
+	it( "nested objects" , async( done ) => {
+
 		try {
 			await mutualTest( {
-				sub: { a: 1, sub: {} } ,
-				sub2: { b: 2, sub: { sub: { sub: { c: 3 } } } } ,
+				sub: { a: 1 , sub: {} } ,
+				sub2: { b: 2 , sub: { sub: { sub: { c: 3 } } } } ,
 				d: 4
 			} ) ;
 		}
@@ -273,34 +273,34 @@ describe( "basic serialization/unserialization features" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "nested arrays and objects" , async function( done ) {
-		
+
+	it( "nested arrays and objects" , async( done ) => {
+
 		var samples = [
 			{
-				sub: [ 1, {} ] ,
-				sub2: [ 2, { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
+				sub: [ 1 , {} ] ,
+				sub2: [ 2 , { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
 				d: 4
 			} ,
 			[
-				[ 1, {} ] ,
-				{ b: 2, sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
+				[ 1 , {} ] ,
+				{ b: 2 , sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
 				4
 			]
 		] ;
-		
+
 		try {
 			await mutualTest( {
-				sub: [ 1, {} ] ,
-				sub2: [ 2, { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
+				sub: [ 1 , {} ] ,
+				sub2: [ 2 , { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
 				d: 4
 			} ) ;
 			await mutualTest( [
-				[ 1, {} ] ,
-				{ b: 2, sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
+				[ 1 , {} ] ,
+				{ b: 2 , sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
 				4
 			] ) ;
 		}
@@ -308,150 +308,146 @@ describe( "basic serialization/unserialization features" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
-	
-	it( "real-world test" , function( done ) {
-		
+
+	it( "real-world test" , ( done ) => {
+
 		mutualTest( require( '../sample/sample1.json' ) ).then( done , done ) ;
 	} ) ;
 } ) ;
 
 
 
-describe( "Instances" , function() {
-	
-	it( "empty instances without constructor" , async function( done ) {
-		
+describe( "Instances" , () => {
+
+	it( "empty instances without constructor" , async( done ) => {
+
 		function ZeClass() {}
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: new ClassMap( {
 				ZeClass: ZeClass
 			} )
 		} ;
-		
+
 		var data = {
 			v: new ZeClass()
 		} ;
-		
+
 		//console.log( 'data: ' , data ) ;
-		
+
 		mutualTest( data , options , options , udata => {
 			//console.log( 'udata: ' , udata ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "instances without constructor" , async function( done ) {
-		
-		function ZeClass()
-		{
+
+	it( "instances without constructor" , async( done ) => {
+
+		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
 		}
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: {
 				ZeClass: ZeClass
 			}
 		} ;
-		
+
 		var data = {
 			v: new ZeClass()
 		} ;
-		
+
 		//console.log( 'data: ' , data ) ;
-		
+
 		mutualTest( data , options , options , udata => {
 			//console.log( 'udata: ' , udata ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "constructed instances, using a 'new' type of constructor" , function( done ) {
-		
-		function ZeClass()
-		{
+
+	it( "constructed instances, using a 'new' type of constructor" , ( done ) => {
+
+		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
 		}
-		
+
 		ZeClass.serializer = function( obj ) {
 			return [ obj ] ;
 		} ;
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: {
 				ZeClass: ZeClass
 			}
 		} ;
-		
+
 		var data = {
 			v: new ZeClass() ,
 			v2: new ZeClass()
 		} ;
-		
+
 		data.v2.inc() ;
-		
+
 		mutualTest( data , options , options , udata => {
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "constructed instances, using a 'new' type of constructor with arguments" , function( done ) {
-		
-		function ZeClass( arg1 , arg2 )
-		{
+
+	it( "constructed instances, using a 'new' type of constructor with arguments" , ( done ) => {
+
+		function ZeClass( arg1 , arg2 ) {
 			this.arg1 = arg1 ;
 			this.arg2 = arg2 ;
 			this.a = 4 ;
 			this.b = 7 ;
 		}
-		
+
 		ZeClass.serializer = function( obj ) {
 			return [ obj.arg1 , obj.arg2 , { a: obj.a , b: obj.b } ] ;
 		} ;
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: {
 				ZeClass: ZeClass
 			}
 		} ;
-		
+
 		var data = {
 			v: new ZeClass( "arg1" , 2 ) ,
 			v2: new ZeClass( { arg: 1 } , [ 2 ] )
 		} ;
-		
+
 		data.v2.inc() ;
-		
-		
-		mutualTest( data , options , options , function( udata ) {
+
+
+		mutualTest( data , options , options , ( udata ) => {
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "constructed instances, using a regular function as constructor" , function( done ) {
-		
-		function ZeClass()
-		{
+
+	it( "constructed instances, using a regular function as constructor" , ( done ) => {
+
+		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
 		}
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: {
 				ZeClass: {
@@ -461,31 +457,30 @@ describe( "Instances" , function() {
 				}
 			}
 		} ;
-		
+
 		var data = {
 			v: new ZeClass() ,
 			v2: new ZeClass()
 		} ;
-		
+
 		data.v2.inc() ;
-		
-		mutualTest( data , options , options , function( udata ) {
+
+		mutualTest( data , options , options , ( udata ) => {
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "constructed instances, using a regular function as constructor, with arguments" , function( done ) {
-		
-		function ZeClass( arg1 , arg2 )
-		{
+
+	it( "constructed instances, using a regular function as constructor, with arguments" , ( done ) => {
+
+		function ZeClass( arg1 , arg2 ) {
 			this.arg1 = arg1 ;
 			this.arg2 = arg2 ;
 			this.a = 4 ;
 			this.b = 7 ;
 		}
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: {
 				ZeClass: {
@@ -497,21 +492,21 @@ describe( "Instances" , function() {
 				}
 			}
 		} ;
-		
+
 		var data = {
 			v: new ZeClass( "arg1" , 2 ) ,
 			v2: new ZeClass( { arg: 1 } , [ 2 ] )
 		} ;
-		
+
 		data.v2.inc() ;
-		
-		mutualTest( data , options , options , function( udata ) {
+
+		mutualTest( data , options , options , ( udata ) => {
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "constructed instances, test the Date object" , async function( done ) {
-		
+
+	it( "constructed instances, test the Date object" , async( done ) => {
+
 		var options = {
 			classMap: {
 				Date: {
@@ -525,7 +520,7 @@ describe( "Instances" , function() {
 				}
 			}
 		} ;
-		
+
 		try {
 			await mutualTest( new Date() , options , options ) ;
 			await mutualTest( [ new Date() , new Date() , new Date() ] , options , options ) ;
@@ -535,31 +530,31 @@ describe( "Instances" , function() {
 			done( error ) ;
 			return ;
 		}
-		
+
 		done() ;
 	} ) ;
 } ) ;
 
 
 
-describe( "References and relational structures" , function() {
-	
-	it( "references (no duplicated object)" , function( done ) {
-		
+describe( "References and relational structures" , () => {
+
+	it( "references (no duplicated object)" , ( done ) => {
+
 		var data = {
-			doc1: { a: 1, b: 2 } ,
-			doc2: { a: 4, b: 7 } ,
+			doc1: { a: 1 , b: 2 } ,
+			doc2: { a: 4 , b: 7 } ,
 			doc3: {} ,
-			doc4: { mlinks:[] } ,
-			doc5: {} ,
+			doc4: { mlinks: [] } ,
+			doc5: {}
 		} ;
-		
+
 		data.circular = data ;
 		data.doc1.link = data.doc3 ;
 		data.doc2.link = data.doc1 ;
 		data.doc5.mlinks = [ data.doc1 , data.doc3 , data ] ;
-		
-		mutualTest( data , function( udata ) {
+
+		mutualTest( data , ( udata ) => {
 			doormen.equals( udata.circular === udata , true ) ;
 			doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
 			doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
@@ -568,36 +563,35 @@ describe( "References and relational structures" , function() {
 			doormen.equals( udata.doc5.mlinks[ 2 ] === udata , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "instances without constructor self referencing itself and other instances" , function( done ) {
-		
-		function ZeClass()
-		{
+
+	it( "instances without constructor self referencing itself and other instances" , ( done ) => {
+
+		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
 		}
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: {
 				ZeClass: ZeClass
 			}
 		} ;
-		
+
 		var data = {
 			v: new ZeClass() ,
 			v2: new ZeClass()
 		} ;
-		
+
 		data.v2.inc() ;
 		data.v.root = data ;
 		data.v.self = data.v ;
 		data.v.v2 = data.v2 ;
 		data.v2.v = data.v ;
 		data.v3 = data.v2 ;
-		
-		mutualTest( data , options , options , function( udata ) {
+
+		mutualTest( data , options , options , ( udata ) => {
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
 			doormen.equals( udata.v.root === udata , true ) ;
@@ -607,48 +601,47 @@ describe( "References and relational structures" , function() {
 			doormen.equals( udata.v3 === udata.v2 , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
-	
-	it( "instances with constructor self referencing itself and other instances" , function( done ) {
-		
-		function ZeClass()
-		{
+
+	it( "instances with constructor self referencing itself and other instances" , ( done ) => {
+
+		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
 		}
-		
-		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
-		
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
 		var options = {
 			classMap: {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
-						
+
 						// Back up anything except constructor args
 						var clone = Object.assign( {} , obj ) ;
 						delete clone.arg1 ;
 						delete clone.arg2 ;
-						
+
 						return [ obj.arg1 , obj.arg2 , clone ] ;
 					} ,
 					unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 				}
 			}
 		} ;
-		
+
 		var data = {
 			v: new ZeClass() ,
 			v2: new ZeClass()
 		} ;
-		
+
 		data.v2.inc() ;
 		data.v.root = data ;
 		data.v.self = data.v ;
 		data.v.v2 = data.v2 ;
 		data.v2.v = data.v ;
 		data.v3 = data.v2 ;
-		
-		mutualTest( data , options , options , function( udata ) {
+
+		mutualTest( data , options , options , ( udata ) => {
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
 			doormen.equals( udata.v.root === udata , true ) ;

@@ -20,16 +20,13 @@ Supports:
 
 ```js
 var stream = fs.createWriteStream( 'path/to/my/file.jsdat' ) ;
-
-jsbindat.serialize( stream , data , function() {
-	stream.end() ;
-} ) ;
+await jsbindat.serialize( stream , data ) ;
 ```
 
 ... or just:
 
 ```js
-jsbindat.writeFile( 'path/to/my/file.jsdat' , data ) ;
+await jsbindat.writeFile( 'path/to/my/file.jsdat' , data ) ;
 ```
 
 
@@ -38,19 +35,15 @@ jsbindat.writeFile( 'path/to/my/file.jsdat' , data ) ;
 
 ```
 var stream = fs.createReadStream( 'path/to/my/file.jsdat' ) ;
-
-jsbindat.unserialize( stream , function( data ) {
-	stream.close() ;
-	// Do something with the data
-} ) ;
+var data = await jsbindat.unserialize( stream ) ;
+stream.close() ;
+// Do something with the data
 ```
 
 ... or just:
 
 ```js
-jsbindat.readFile( 'path/to/my/file.jsdat' , function( data ) {
-	// Do something with the data
-} ) ;
+var data = jsbindat.readFile( 'path/to/my/file.jsdat' ) ;
 ```
 
 
@@ -59,7 +52,4 @@ jsbindat.readFile( 'path/to/my/file.jsdat' , function( data ) {
 
 TODO: documentation
 
-
-
-### BDD Spec
 
