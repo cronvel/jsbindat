@@ -24,9 +24,6 @@
 	SOFTWARE.
 */
 
-/* jshint unused:false */
-/* global describe, it, before, after */
-
 "use strict" ;
 
 
@@ -36,7 +33,6 @@ var jsbindat = require( '../lib/jsbindat.js' ) ;
 var ClassMap = jsbindat.ClassMap ;
 //var expect = require( 'expect.js' ) ;
 var doormen = require( 'doormen' ) ;
-var async = require( 'async-kit' ) ;
 var Promise = require( 'seventh' ) ;
 var string = require( 'string-kit' ) ;
 
@@ -86,7 +82,7 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
 		
 		data = await jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions ) ;
-		deb( 'data' , data ) ;
+		//deb( 'data' , data ) ;
 		
 		doormen.equals( data , originalData ) ;
 		
@@ -99,9 +95,9 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 		
 	}
 	catch ( error ) {
-		console.log( "Error!" , error ) ;
-		deb( "Input data" , originalData ) ;
-		deb( "Output data" , data ) ;
+		//console.log( "Error!" , error ) ;
+		//deb( "Input data" , originalData ) ;
+		//deb( "Output data" , data ) ;
 		throw error ;
 		return ;
 	}
@@ -405,10 +401,7 @@ describe( "Instances" , function() {
 		
 		data.v2.inc() ;
 		
-		//console.log( 'data: ' , deb( data ) ) ;
-		
 		mutualTest( data , options , options , udata => {
-			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
@@ -443,10 +436,8 @@ describe( "Instances" , function() {
 		
 		data.v2.inc() ;
 		
-		//console.log( 'data: ' , deb( data ) ) ;
 		
 		mutualTest( data , options , options , function( udata ) {
-			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
@@ -478,10 +469,7 @@ describe( "Instances" , function() {
 		
 		data.v2.inc() ;
 		
-		//console.log( 'data: ' , deb( data ) ) ;
-		
 		mutualTest( data , options , options , function( udata ) {
-			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
@@ -517,10 +505,7 @@ describe( "Instances" , function() {
 		
 		data.v2.inc() ;
 		
-		//console.log( 'data: ' , deb( data ) ) ;
-		
 		mutualTest( data , options , options , function( udata ) {
-			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
@@ -612,10 +597,7 @@ describe( "References and relational structures" , function() {
 		data.v2.v = data.v ;
 		data.v3 = data.v2 ;
 		
-		//console.log( 'data: ' , deb( data ) ) ;
-		
 		mutualTest( data , options , options , function( udata ) {
-			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
 			doormen.equals( udata.v.root === udata , true ) ;
@@ -626,7 +608,7 @@ describe( "References and relational structures" , function() {
 		} ).then( done , done ) ;
 	} ) ;
 	
-	it( "zzz instances with constructor self referencing itself and other instances" , function( done ) {
+	it( "instances with constructor self referencing itself and other instances" , function( done ) {
 		
 		function ZeClass()
 		{
@@ -666,10 +648,7 @@ describe( "References and relational structures" , function() {
 		data.v2.v = data.v ;
 		data.v3 = data.v2 ;
 		
-		//console.log( 'data: ' , deb( data ) ) ;
-		
 		mutualTest( data , options , options , function( udata ) {
-			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
 			doormen.equals( udata.v.root === udata , true ) ;
