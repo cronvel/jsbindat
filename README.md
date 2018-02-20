@@ -33,7 +33,7 @@ await jsbindat.writeFile( 'path/to/my/file.jsdat' , data ) ;
 
 ### Unserializing from a file example
 
-```
+```js
 var stream = fs.createReadStream( 'path/to/my/file.jsdat' ) ;
 var data = await jsbindat.unserialize( stream ) ;
 stream.close() ;
