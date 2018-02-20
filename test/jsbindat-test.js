@@ -200,75 +200,88 @@ describe( "basic serialization/unserialization features" , function() {
 		done() ;
 	} ) ;
 	
-	it( "ES6 Set" , function( done ) {
+	it( "ES6 Set" , async function( done ) {
 		
-		var set = new Set() ;
+		var set ;
 		
-		set.add( { a: 1 } ) ;
-		set.add( { b: 2 } ) ;
+		try {
+			await mutualTest( new Set() ) ;
+			
+			set = new Set() ;
+			set.add( 1 ) ;
+			set.add( "bob" ) ;
+			await mutualTest( set ) ;
+			
+			set = new Set() ;
+			set.add( { a: 1 } ) ;
+			set.add( { b: 2 } ) ;
+			//await mutualTest( set ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
 		
-		var samples = [ new Set() , set ] ;
-		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		done() ;
 	} ) ;
 	
-	it( "nested arrays" , function( done ) {
+	it( "nested arrays" , async function( done ) {
 		
-		var samples = [
-			[
+		try {
+			await mutualTest( [
 				[ 1 , 2 , 3 ] ,
 				[ true , false ] ,
 				[ null , 'another string' , 'this is a really really really big big big string!'.repeat( 100 ) , 'a string' ]
-			]
-		] ;
+			] ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
 		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		done() ;
 	} ) ;
 	
-	it( "objects" , function( done ) {
+	it( "objects" , async function( done ) {
 		
 		var big = 'this is a really really really big big big string!'.repeat( 100 ) ;
 		
-		var samples = [
-			{} ,
-			{ a: 1 , b: 2 } ,
-			{ a: 1 , b: 2 , c: true , d: 'a string' , f: 'big' , abcdefghijklmnopq: true , g: 'gee' } ,
-			{ a: 1 , b: 2 , c: true , d: 'a string' , f: big , abcdefghijklmnopq: true , g: 'gee' }
-		] ;
+		var bigKeyObject = { a: 1 , b: 2 , c: true , d: 'a string' , f: big , abcdefghijklmnopq: true , g: 'gee' } ;
+		bigKeyObject[ big ] = big ;
+		bigKeyObject.notbig = 'notbigstring' ;
 		
-		// Big key
-		samples[ samples.length - 1 ][ big ] = big ;
-		samples[ samples.length - 1 ].notbig = 'notbigstring' ;
+		try {
+			await mutualTest( {} ) ;
+			await mutualTest( { a: 1 , b: 2 } ) ;
+			await mutualTest( { a: 1 , b: 2 , c: true , d: 'a string' , f: 'big' , abcdefghijklmnopq: true , g: 'gee' } ) ;
+			await mutualTest( bigKeyObject ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
 		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		done() ;
 	} ) ;
 	
-	it( "nested objects" , function( done ) {
+	it( "nested objects" , async function( done ) {
 		
-		var samples = [
-			{
+		try {
+			await mutualTest( {
 				sub: { a: 1, sub: {} } ,
 				sub2: { b: 2, sub: { sub: { sub: { c: 3 } } } } ,
 				d: 4
-			}
-		] ;
+			} ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
 		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		done() ;
 	} ) ;
 	
-	it( "nested arrays and objects" , function( done ) {
+	it( "nested arrays and objects" , async function( done ) {
 		
 		var samples = [
 			{
@@ -283,10 +296,24 @@ describe( "basic serialization/unserialization features" , function() {
 			]
 		] ;
 		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		try {
+			await mutualTest( {
+				sub: [ 1, {} ] ,
+				sub2: [ 2, { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
+				d: 4
+			} ) ;
+			await mutualTest( [
+				[ 1, {} ] ,
+				{ b: 2, sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
+				4
+			] ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+		
+		done() ;
 	} ) ;
 	
 	it( "real-world test" , function( done ) {
@@ -299,7 +326,31 @@ describe( "basic serialization/unserialization features" , function() {
 
 describe( "Instances" , function() {
 	
-	it( "instances without constructor" , function( done ) {
+	it( "empty instances without constructor" , async function( done ) {
+		
+		function ZeClass() {}
+		
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
+		
+		var options = {
+			classMap: new ClassMap( {
+				ZeClass: ZeClass
+			} )
+		} ;
+		
+		var data = {
+			v: new ZeClass()
+		} ;
+		
+		//console.log( 'data: ' , data ) ;
+		
+		mutualTest( data , options , options , udata => {
+			//console.log( 'udata: ' , udata ) ;
+			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+		} ).then( done , done ) ;
+	} ) ;
+	
+	it( "instances without constructor" , async function( done ) {
 		
 		function ZeClass()
 		{
@@ -310,11 +361,9 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classMap: new ClassMap( {
-				ZeClass: {
-					prototype: ZeClass.prototype
-				}
-			} )
+			classMap: {
+				ZeClass: ZeClass
+			}
 		} ;
 		
 		var data = {
@@ -323,10 +372,10 @@ describe( "Instances" , function() {
 		
 		//console.log( 'data: ' , data ) ;
 		
-		mutualTest( data , options , options , function( udata ) {
+		mutualTest( data , options , options , udata => {
 			//console.log( 'udata: ' , udata ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} , done ) ;
+		} ).then( done , done ) ;
 	} ) ;
 	
 	it( "constructed instances, using a 'new' type of constructor" , function( done ) {
@@ -337,18 +386,16 @@ describe( "Instances" , function() {
 			this.b = 7 ;
 		}
 		
+		ZeClass.serializer = function( obj ) {
+			return [ obj ] ;
+		} ;
+		
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classMap: ClassMap.create( {
-				ZeClass: {
-					prototype: ZeClass.prototype ,
-					serializer: function( obj ) {
-						return [ undefined , obj ] ;
-					} ,
-					newConstructor: ZeClass
-				}
-			} )
+			classMap: {
+				ZeClass: ZeClass
+			}
 		} ;
 		
 		var data = {
@@ -360,10 +407,11 @@ describe( "Instances" , function() {
 		
 		//console.log( 'data: ' , deb( data ) ) ;
 		
-		mutualTest( data , options , options , function( udata ) {
+		mutualTest( data , options , options , udata => {
 			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} , done ) ;
+			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
+		} ).then( done , done ) ;
 	} ) ;
 	
 	it( "constructed instances, using a 'new' type of constructor with arguments" , function( done ) {
@@ -376,18 +424,16 @@ describe( "Instances" , function() {
 			this.b = 7 ;
 		}
 		
+		ZeClass.serializer = function( obj ) {
+			return [ obj.arg1 , obj.arg2 , { a: obj.a , b: obj.b } ] ;
+		} ;
+		
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classMap: ClassMap.create( {
-				ZeClass: {
-					prototype: ZeClass.prototype ,
-					serializer: function( obj ) {
-						return [ [ obj.arg1 , obj.arg2 ] , { a: obj.a , b: obj.b } ] ;
-					} ,
-					newConstructor: ZeClass
-				}
-			} )
+			classMap: {
+				ZeClass: ZeClass
+			}
 		} ;
 		
 		var data = {
@@ -402,7 +448,7 @@ describe( "Instances" , function() {
 		mutualTest( data , options , options , function( udata ) {
 			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} , done ) ;
+		} ).then( done , done ) ;
 	} ) ;
 	
 	it( "constructed instances, using a regular function as constructor" , function( done ) {
@@ -416,15 +462,13 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classMap: ClassMap.create( {
+			classMap: {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
-					serializer: function( obj ) {
-						return [ undefined , obj ] ;
-					} ,
-					constructor: function() { return new ZeClass() ; }
+					serializer: function( obj ) { return [ obj ] ; } ,
+					unserializer: function() { return new ZeClass() ; }
 				}
-			} )
+			}
 		} ;
 		
 		var data = {
@@ -439,7 +483,7 @@ describe( "Instances" , function() {
 		mutualTest( data , options , options , function( udata ) {
 			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} , done ) ;
+		} ).then( done , done ) ;
 	} ) ;
 	
 	it( "constructed instances, using a regular function as constructor, with arguments" , function( done ) {
@@ -455,15 +499,15 @@ describe( "Instances" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classMap: ClassMap.create( {
+			classMap: {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
-						return [ [ obj.arg1 , obj.arg2 ] , { a: obj.a , b: obj.b } ] ;
+						return [ obj.arg1 , obj.arg2 , { a: obj.a , b: obj.b } ] ;
 					} ,
-					constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
+					unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 				}
-			} )
+			}
 		} ;
 		
 		var data = {
@@ -478,39 +522,36 @@ describe( "Instances" , function() {
 		mutualTest( data , options , options , function( udata ) {
 			//console.log( 'udata: ' , deb( udata ) ) ;
 			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} , done ) ;
+		} ).then( done , done ) ;
 	} ) ;
 	
-	it( "constructed instances, test the Date object" , function( done ) {
+	it( "constructed instances, test the Date object" , async function( done ) {
 		
 		var options = {
-			classMap: ClassMap.create( {
+			classMap: {
 				Date: {
 					prototype: Date.prototype ,
-					constructor: function( arg ) {
+					unserializer: function( arg ) {
 						return new Date( arg ) ;
 					} ,
 					serializer: function( value ) {
-						return [ value.getTime() ] ;
+						return [ value.getTime() , null ] ;
 					}
 				}
-			} )
+			}
 		} ;
 		
-		var samples = [
-			new Date() ,
-			[ new Date() , new Date() , new Date() ] ,
-			{ a: new Date() , b: new Date() , c: new Date() } ,
-		] ;
+		try {
+			await mutualTest( new Date() , options , options ) ;
+			await mutualTest( [ new Date() , new Date() , new Date() ] , options , options ) ;
+			await mutualTest( { a: new Date() , b: new Date() , c: new Date() } , options , options ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
 		
-		//console.log( 'samples: ' , deb( samples ) ) ;
-		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , options , options , function( udata ) {
-				//console.log( 'udata: ' , deb( udata ) ) ;
-			} , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		done() ;
 	} ) ;
 } ) ;
 
@@ -518,7 +559,7 @@ describe( "Instances" , function() {
 
 describe( "References and relational structures" , function() {
 	
-	it( "references (no duplicated object)" , function( done ) {
+	it( "zzz references (no duplicated object)" , function( done ) {
 		
 		var data = {
 			doc1: { a: 1, b: 2 } ,
@@ -540,7 +581,7 @@ describe( "References and relational structures" , function() {
 			doormen.equals( udata.doc5.mlinks[ 0 ] === udata.doc1 , true ) ;
 			doormen.equals( udata.doc5.mlinks[ 1 ] === udata.doc3 , true ) ;
 			doormen.equals( udata.doc5.mlinks[ 2 ] === udata , true ) ;
-		} , done ) ;
+		} ).then( done , done ) ;
 	} ) ;
 	
 	it( "instances without constructor self referencing itself and other instances" , function( done ) {
