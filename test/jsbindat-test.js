@@ -559,7 +559,7 @@ describe( "Instances" , function() {
 
 describe( "References and relational structures" , function() {
 	
-	it( "zzz references (no duplicated object)" , function( done ) {
+	it( "references (no duplicated object)" , function( done ) {
 		
 		var data = {
 			doc1: { a: 1, b: 2 } ,
@@ -595,11 +595,9 @@ describe( "References and relational structures" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classMap: ClassMap.create( {
-				ZeClass: {
-					prototype: ZeClass.prototype
-				}
-			} )
+			classMap: {
+				ZeClass: ZeClass
+			}
 		} ;
 		
 		var data = {
@@ -625,10 +623,10 @@ describe( "References and relational structures" , function() {
 			doormen.equals( udata.v.v2 === udata.v2 , true ) ;
 			doormen.equals( udata.v2.v === udata.v , true ) ;
 			doormen.equals( udata.v3 === udata.v2 , true ) ;
-		} , done ) ;
+		} ).then( done , done ) ;
 	} ) ;
 	
-	it( "instances with constructor self referencing itself and other instances" , function( done ) {
+	it( "zzz instances with constructor self referencing itself and other instances" , function( done ) {
 		
 		function ZeClass()
 		{
@@ -639,7 +637,7 @@ describe( "References and relational structures" , function() {
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; }
 		
 		var options = {
-			classMap: ClassMap.create( {
+			classMap: {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
@@ -649,11 +647,11 @@ describe( "References and relational structures" , function() {
 						delete clone.arg1 ;
 						delete clone.arg2 ;
 						
-						return [ [ obj.arg1 , obj.arg2 ] , clone ] ;
+						return [ obj.arg1 , obj.arg2 , clone ] ;
 					} ,
-					constructor: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
+					unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 				}
-			} )
+			}
 		} ;
 		
 		var data = {
@@ -679,7 +677,7 @@ describe( "References and relational structures" , function() {
 			doormen.equals( udata.v.v2 === udata.v2 , true ) ;
 			doormen.equals( udata.v2.v === udata.v , true ) ;
 			doormen.equals( udata.v3 === udata.v2 , true ) ;
-		} , done ) ;
+		} ).then( done , done ) ;
 	} ) ;
 } ) ;
 
