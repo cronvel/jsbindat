@@ -48,8 +48,21 @@ var string = require( 'string-kit' ) ;
 
 
 
-async function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb )
-{
+function deb( title , v ) {
+	if ( arguments.length < 2 ) {
+		v = title ;
+		title = null ;
+	}
+	
+	console.log( 
+		( title ? title + ': ' : '' ) +
+		string.inspect( { style: 'color' , depth: 5 } , v )
+	) ;
+}
+
+
+
+async function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb ) {
 	var data ;
 	
 	// Manage arguments
@@ -73,7 +86,7 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
 		
 		data = await jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions ) ;
-		console.log( '\n\n>>> data:' , data , '\n\n' ) ;
+		deb( 'data' , data ) ;
 		
 		doormen.equals( data , originalData ) ;
 		
@@ -87,20 +100,13 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 	}
 	catch ( error ) {
 		console.log( "Error!" , error ) ;
-		console.log( "Input data" , originalData ) ;
-		console.log( "Output data:" , data ) ;
+		deb( "Input data" , originalData ) ;
+		deb( "Output data" , data ) ;
 		throw error ;
 		return ;
 	}
 	
 	if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
-}
-
-
-
-function deb( v )
-{
-	return string.inspect( { style: 'color' } , v ) ;
 }
 
 
@@ -157,11 +163,11 @@ describe( "basic serialization/unserialization features" , function() {
 	it( "strings" , async function( done ) {
 		
 		try {
-			//await mutualTest( '' ) ;
+			await mutualTest( '' ) ;
 			await mutualTest( 'a' ) ;
 			await mutualTest( 'a string' ) ;
 			await mutualTest( 'a'.repeat( 32 ) ) ;
-			/*
+			//*
 			await mutualTest( 'a'.repeat( 64 ) ) ;
 			await mutualTest( 'a'.repeat( 128 ) ) ;
 			await mutualTest( 'a'.repeat( 256 ) ) ;
@@ -179,18 +185,19 @@ describe( "basic serialization/unserialization features" , function() {
 		done() ;
 	} ) ;
 	
-	it( "arrays" , function( done ) {
+	it( "arrays" , async function( done ) {
 		
-		var samples = [
-			[] ,
-			[ true , false ] ,
-			[ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ]
-		] ;
+		try {
+			await mutualTest( [] ) ;
+			await mutualTest( [ true , false ] ) ;
+			await mutualTest( [ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ] ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
 		
-		async.foreach( samples , function( data , foreachCallback ) {
-			mutualTest( data , foreachCallback ) ;
-		} )
-		.exec( done ) ;
+		done() ;
 	} ) ;
 	
 	it( "ES6 Set" , function( done ) {
