@@ -79,7 +79,7 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
 
 		data = await jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions ) ;
-		//deb( 'data' , data ) ;
+		deb( 'data' , data ) ;
 
 		doormen.equals( data , originalData ) ;
 
@@ -132,14 +132,38 @@ describe( "basic serialization/unserialization features" , () => {
 		try {
 			await mutualTest( 0 ) ;
 			await mutualTest( 1 ) ;
+			await mutualTest( -1 ) ;
 			await mutualTest( 123 ) ;
+			await mutualTest( 127 ) ;
+			await mutualTest( 128 ) ;
+			await mutualTest( -127 ) ;
+			await mutualTest( -128 ) ;
+			await mutualTest( 255 ) ;
+			await mutualTest( 256 ) ;
+			await mutualTest( 32767 ) ;
+			await mutualTest( 32768 ) ;
+			await mutualTest( 65535 ) ;
+			await mutualTest( 65536 ) ;
+			await mutualTest( -32768 ) ;
+			await mutualTest( -32769 ) ;
 			await mutualTest( 123456789 ) ;
+			await mutualTest( 2147483647 ) ;
+			await mutualTest( 2147483648 ) ;
+			await mutualTest( 4294967295 ) ;
+			await mutualTest( 4294967296 ) ;
+			await mutualTest( -2147483648 ) ;
+			await mutualTest( -2147483649 ) ;
+			await mutualTest( 21474836480 ) ;
+			await mutualTest( -21474836480 ) ;
 			await mutualTest( 0.123 ) ;
 			await mutualTest( 123.456 ) ;
-			await mutualTest( -1 ) ;
 			await mutualTest( -123456789 ) ;
 			await mutualTest( -0.123 ) ;
 			await mutualTest( -123.456 ) ;
+			await mutualTest( 0.000000001 ) ;
+			await mutualTest( -0.000000001 ) ;
+			await mutualTest( Math.PI ) ;
+			await mutualTest( -Math.PI ) ;
 			await mutualTest( NaN ) ;
 			await mutualTest( Infinity ) ;
 			await mutualTest( -Infinity ) ;
@@ -207,7 +231,7 @@ describe( "basic serialization/unserialization features" , () => {
 			set = new Set() ;
 			set.add( { a: 1 } ) ;
 			set.add( { b: 2 } ) ;
-			//await mutualTest( set ) ;
+			await mutualTest( set ) ;
 		}
 		catch ( error ) {
 			done( error ) ;
@@ -303,6 +327,45 @@ describe( "basic serialization/unserialization features" , () => {
 				{ b: 2 , sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
 				4
 			] ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+
+		done() ;
+	} ) ;
+
+	it( "ES6 Map" , async( done ) => {
+
+		var map ;
+
+		try {
+			await mutualTest( new Map() ) ;
+
+			map = new Map() ;
+			map.set( { jack: '2' } , 1 ) ;
+			map.set( "bob" , "bill" ) ;
+			map.set( { keyKey: 'value of key' } , { valueKey: 'value of value' } ) ;
+			await mutualTest( map ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+
+		done() ;
+	} ) ;
+
+	it( "Buffer" , async( done ) => {
+
+		var buffer , i ;
+		
+		
+		try {
+			buffer = Buffer.allocUnsafe( 80 ) ;
+			for ( i = 0 ; i < 80 ; i ++ ) { buffer[ i ] = i ; }
+			await mutualTest( buffer ) ;
 		}
 		catch ( error ) {
 			done( error ) ;

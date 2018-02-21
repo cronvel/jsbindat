@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "seventh": "^0.6.4",
-    "stream-kit": "^0.2.0"
+    "stream-kit": "^0.2.1"
   },
   "devDependencies": {
-    "doormen": "^0.6.7",
+    "doormen": "^0.6.10",
     "expect.js": "^0.3.1",
     "mocha": "^3.2.0",
     "string-kit": "^0.6.9"
