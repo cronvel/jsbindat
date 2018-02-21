@@ -79,7 +79,7 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
 
 		data = await jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions ) ;
-		deb( 'data' , data ) ;
+		//deb( 'data' , data ) ;
 
 		doormen.equals( data , originalData ) ;
 
@@ -359,13 +359,11 @@ describe( "basic serialization/unserialization features" , () => {
 
 	it( "Buffer" , async( done ) => {
 
-		var buffer , i ;
-		
-		
 		try {
-			buffer = Buffer.allocUnsafe( 80 ) ;
-			for ( i = 0 ; i < 80 ; i ++ ) { buffer[ i ] = i ; }
-			await mutualTest( buffer ) ;
+			// Let allocUnsafe() create some garbage data...
+			await mutualTest( Buffer.allocUnsafe( 10 ) ) ;
+			await mutualTest( Buffer.allocUnsafe( 100 ) ) ;
+			await mutualTest( Buffer.allocUnsafe( 1000000 ) ) ;
 		}
 		catch ( error ) {
 			done( error ) ;
