@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
 	JS Binary Data
 	

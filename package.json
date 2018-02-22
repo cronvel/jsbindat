@@ -1,6 +1,6 @@
 {
   "name": "jsbindat",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Binary data serializer and unserializer for Node.js.",
   "main": "lib/jsbindat.js",
   "engines": {

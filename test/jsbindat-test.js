@@ -594,6 +594,103 @@ describe( "Instances" , () => {
 
 		done() ;
 	} ) ;
+	
+	it( "Serializer 'autoInstance' option" , async( done ) => {
+		function ZeClass() {
+			this.a = 4 ;
+			this.b = 7 ;
+		}
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
+		var serializerOptions = { autoInstance: true } ;
+
+		var unserializerOptions = {
+			classMap: new ClassMap( {
+				ZeClass: ZeClass
+			} )
+		} ;
+
+		var data = {
+			v: new ZeClass()
+		} ;
+
+		//console.log( 'data: ' , data ) ;
+
+		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+			//console.log( 'udata: ' , udata ) ;
+			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
+		} ).then( done , done ) ;
+	} ) ;
+	
+	it( "Unserializer 'enableUnknown' option" , async( done ) => {
+		function ZeClass() {
+			this.a = 4 ;
+			this.b = 7 ;
+		}
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
+		var data = {
+			v: new ZeClass()
+		} ;
+
+		//console.log( 'data: ' , data ) ;
+		
+		try {
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { autoInstance: true } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { enableUnknown: true } ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			doormen.equals( unserializedData , {
+				v: {
+					__className__: "ZeClass" ,
+					a: 4 ,
+					b: 7
+				}
+			} ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+		
+		done() ;
+	} ) ;
+	
+	it( "'autoInstance' with a .serializer() class method and 'enableUnknown'" , async( done ) => {
+		function ZeClass( a = 4 , b = 7 ) {
+			this.a = a ;
+			this.b = b ;
+		}
+
+		ZeClass.serializer = function( object ) { return [ object.a , object.b , null ] ; } ;
+		
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
+		var data = {
+			v: new ZeClass()
+		} ;
+
+		//console.log( 'data: ' , data ) ;
+		
+		try {
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { autoInstance: true } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { enableUnknown: true } ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			doormen.equals( unserializedData , {
+				v: {
+					__constructorArgs__: [ 4 , 7 ] ,
+					__className__: "ZeClass"
+				}
+			} ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+		
+		done() ;
+	} ) ;
 } ) ;
 
 
