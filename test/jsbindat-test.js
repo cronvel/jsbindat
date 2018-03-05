@@ -566,6 +566,88 @@ describe( "Instances" , () => {
 		} ).then( done , done ) ;
 	} ) ;
 
+	it( "constructed instances, with the 'unserializeContext' option" , async ( done ) => {
+
+		function ZeClass( arg1 , arg2 ) {
+			this.arg1 = arg1 ;
+			this.arg2 = arg2 ;
+			this.a = 4 ;
+			this.b = 7 ;
+		}
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
+		var classMap = {
+			ZeClass: {
+				prototype: ZeClass.prototype ,
+				serializer: function( obj ) {
+					return [ obj.arg1 , obj.arg2 , { a: obj.a , b: obj.b } ] ;
+				} ,
+				unserializer: function( ctx , arg1 , arg2 ) {
+					var object = new ZeClass( arg1 , arg2 ) ;
+					if ( ctx ) { object.ctx = ctx ; }
+					return object ;
+				} ,
+				unserializeContext: true
+			}
+		} ;
+
+		var data = {
+			v: new ZeClass( "arg1" , 2 ) ,
+			v2: new ZeClass( { arg: 1 } , [ 2 ] )
+		} ;
+
+		data.v2.inc() ;
+
+		try {
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { classMap: classMap } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap } ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			
+			doormen.equals( unserializedData , {
+				v: Object.assign( new ZeClass() , {
+					a: 4 ,
+					b: 7 ,
+					arg1: "arg1" ,
+					arg2: 2
+				} ) ,
+				v2: Object.assign( new ZeClass() , {
+					a: 5 ,
+					b: 8 ,
+					arg1: { arg: 1 } ,
+					arg2: [ 2 ]
+				} )
+			} ) ;
+			
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { classMap: classMap } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap , context: "bob" } ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			
+			doormen.equals( unserializedData , {
+				v: Object.assign( new ZeClass() , {
+					a: 4 ,
+					b: 7 ,
+					arg1: "arg1" ,
+					arg2: 2 ,
+					ctx: "bob"
+				} ) ,
+				v2: Object.assign( new ZeClass() , {
+					a: 5 ,
+					b: 8 ,
+					arg1: { arg: 1 } ,
+					arg2: [ 2 ] ,
+					ctx: "bob"
+				} )
+			} ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+		
+		done() ;
+	} ) ;
+
 	it( "constructed instances, test the Date object" , async( done ) => {
 
 		var options = {
