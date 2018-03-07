@@ -10,9 +10,12 @@ Serialize and unserialize any Javascript data.
 
 Supports:
 
-* All Javascript types: undefined, null, boolean, number, string, array and object
-* Relational data, circular references: once unserialized, there is no object duplication
-* Serialize/unserialize instance of non-trivial object
+* All Javascript basic types: undefined, null, boolean, number, string, array and object
+* ES6 Set and Map
+* Relational data & circular references: no object duplication, the output structure is the same than the input was
+* Prototype chain is supported (require the 'prototypeChain' serializer option)
+* Instance of non-trivial object are supported, if a map of names to prototype/constructor is provided (require the 'classMap'
+  option to be set to a common object/map on both the serializer and unserializer)
 
 
 
