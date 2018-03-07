@@ -52,7 +52,7 @@ function deb( title , v ) {
 
 	console.log(
 		( title ? title + ': ' : '' ) +
-		string.inspect( { style: 'color' , depth: 5 } , v )
+		string.inspect( { style: 'color' , depth: 5 , proto: false } , v )
 	) ;
 }
 
@@ -78,7 +78,9 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 	try {
 		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
 
+		//console.log( 'before' ) ;
 		data = await jsbindat.readFile( __dirname + '/out.jsdat' , unserializerOptions ) ;
+		//console.log( 'after' ) ;
 		//deb( 'data' , data ) ;
 
 		doormen.equals( data , originalData ) ;
@@ -371,6 +373,12 @@ describe( "basic serialization/unserialization features" , () => {
 		}
 
 		done() ;
+	} ) ;
+
+	it( "Object.prototype" , ( done ) => {
+		mutualTest( Object.prototype , null , null , udata => {
+			doormen.equals( udata === Object.prototype , true ) ;
+		} ).then( done , done ) ;
 	} ) ;
 
 	it( "real-world test" , ( done ) => {
@@ -772,6 +780,141 @@ describe( "Instances" , () => {
 		}
 		
 		done() ;
+	} ) ;
+	
+	it( "Serializer 'prototypeChain' option and prototyped object (inheritance)" , async ( done ) => {
+		
+		var parent = {
+			a: 1 ,
+			b: 2
+		} ;
+		
+		var child = Object.create( parent ) ;
+		child.c = 3 ;
+		
+		var serializerOptions = { prototypeChain: true } ;
+		var unserializerOptions = {} ;
+
+		var data = {
+			object: child
+		} ;
+
+		//console.log( 'data: ' , data ) ;
+
+		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+			//console.log( 'udata: ' , udata ) ;
+			//console.log( "udata.object's prototype: " , Object.getPrototypeOf( udata.object ) ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object ) , parent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object ) ) , Object.prototype ) ;
+		} ).then( done , done ) ;
+	} ) ;
+	
+	it( "Serializer 'prototypeChain' option and multiple object sharing the same prototype" , async ( done ) => {
+		
+		var parent = {
+			a: 1 ,
+			b: 2
+		} ;
+		
+		var child = Object.create( parent ) ;
+		child.c = 3 ;
+		
+		var child2 = Object.create( parent ) ;
+		child2.d = 4 ;
+		
+		var child3 = Object.create( parent ) ;
+		child3.e = 5 ;
+		
+		var serializerOptions = { prototypeChain: true } ;
+		var unserializerOptions = {} ;
+
+		var data = {
+			object: child ,
+			object2: child2 ,
+			object3: child3
+		} ;
+
+		//console.log( 'data: ' , data ) ;
+
+		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+			//console.log( 'udata: ' , udata ) ;
+			//console.log( "udata.object's prototype: " , Object.getPrototypeOf( udata.object ) ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object ) , parent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object ) ) , Object.prototype ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object2 ) , parent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) , Object.prototype ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object3 ) , parent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) , Object.prototype ) ;
+			
+			doormen.equals( Object.getPrototypeOf( udata.object ) === Object.getPrototypeOf( udata.object2 ) , true ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object ) === Object.getPrototypeOf( udata.object3 ) , true ) ;
+		} ).then( done , done ) ;
+	} ) ;
+	
+	it( "Serializer 'prototypeChain' option and prototype chain" , async ( done ) => {
+		
+		var grandParent = {
+			a: 1 ,
+			b: 2
+		} ;
+		
+		var parent1 = Object.create( grandParent ) ;
+		parent1.c = 3 ;
+		
+		var parent2 = Object.create( grandParent ) ;
+		parent2.d = 4 ;
+		
+		var child1 = Object.create( parent1 ) ;
+		child1.e = 5 ;
+		
+		var child2 = Object.create( parent1 ) ;
+		child2.f = 6 ;
+		
+		var child3 = Object.create( parent2 ) ;
+		child3.g = 7 ;
+		
+		var serializerOptions = { prototypeChain: true } ;
+		var unserializerOptions = {} ;
+
+		var data = {
+			object0: grandParent ,
+			object1: child1 ,
+			object2: child2 ,
+			object3: child3 ,
+			object4: parent1 ,
+			object5: parent2 ,
+		} ;
+
+		//console.log( 'data: ' , data ) ;
+
+		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+			//console.log( 'udata: ' , udata ) ;
+			//console.log( "udata.object's prototype: " , Object.getPrototypeOf( udata.object ) ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object1 ) , parent1 ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object1 ) ) , grandParent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object1 ) ) ) === Object.prototype , true ) ;
+			
+			doormen.equals( Object.getPrototypeOf( udata.object2 ) , parent1 ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) , grandParent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) ) === Object.prototype , true ) ;
+			
+			doormen.equals( Object.getPrototypeOf( udata.object3 ) , parent2 ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) , grandParent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) ) === Object.prototype , true ) ;
+			
+			doormen.equals( Object.getPrototypeOf( udata.object4 ) , grandParent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object4 ) ) === Object.prototype , true ) ;
+			
+			doormen.equals( Object.getPrototypeOf( udata.object5 ) , grandParent ) ;
+			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object5 ) ) === Object.prototype , true ) ;
+			
+			doormen.equals( Object.getPrototypeOf( udata.object1 ) === udata.object4 , true ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object2 ) === udata.object4 , true ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object3 ) === udata.object5 , true ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object4 ) === udata.object0 , true ) ;
+			doormen.equals( Object.getPrototypeOf( udata.object5 ) === udata.object0 , true ) ;
+			//doormen.equals( Object.getPrototypeOf( udata.object ) === Object.getPrototypeOf( udata.object3 ) , true ) ;
+		} ).then( done , done ) ;
 	} ) ;
 } ) ;
 
