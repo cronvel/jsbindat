@@ -450,7 +450,7 @@ describe( "Instances" , () => {
 		}
 
 		ZeClass.serializer = function( obj ) {
-			return [ obj ] ;
+			return { overide: obj } ;
 		} ;
 
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
@@ -484,7 +484,7 @@ describe( "Instances" , () => {
 		}
 
 		ZeClass.serializer = function( obj ) {
-			return [ obj.arg1 , obj.arg2 , { a: obj.a , b: obj.b } ] ;
+			return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
 		} ;
 
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
@@ -521,7 +521,7 @@ describe( "Instances" , () => {
 			classMap: {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
-					serializer: function( obj ) { return [ obj ] ; } ,
+					serializer: function( obj ) { return { overide: obj } ; } ,
 					unserializer: function() { return new ZeClass() ; }
 				}
 			}
@@ -555,7 +555,7 @@ describe( "Instances" , () => {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
-						return [ obj.arg1 , obj.arg2 , { a: obj.a , b: obj.b } ] ;
+						return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
 					} ,
 					unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 				}
@@ -589,7 +589,7 @@ describe( "Instances" , () => {
 			ZeClass: {
 				prototype: ZeClass.prototype ,
 				serializer: function( obj ) {
-					return [ obj.arg1 , obj.arg2 , { a: obj.a , b: obj.b } ] ;
+					return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
 				} ,
 				unserializer: function( ctx , arg1 , arg2 ) {
 					var object = new ZeClass( arg1 , arg2 ) ;
@@ -656,6 +656,85 @@ describe( "Instances" , () => {
 		done() ;
 	} ) ;
 
+	it( "constructed instances, with the 'universal' serializer/unserializer option" , async ( done ) => {
+
+		function ZeClass( arg1 , arg2 ) {
+			this.arg1 = arg1 ;
+			this.arg2 = arg2 ;
+			this.a = 4 ;
+			this.b = 7 ;
+		}
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
+		var universal = {
+			serializer: function( obj ) {
+				return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
+			} ,
+			unserializer: function( ctx , arg1 , arg2 ) {
+				var object = new ZeClass( arg1 , arg2 ) ;
+				if ( ctx ) { object.ctx = ctx ; }
+				return object ;
+			} ,
+			unserializeContext: true
+		} ;
+
+		var data = {
+			v: new ZeClass( "arg1" , 2 ) ,
+			v2: new ZeClass( { arg: 1 } , [ 2 ] )
+		} ;
+
+		data.v2.inc() ;
+
+		try {
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { universal: universal } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal } ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			
+			doormen.equals( unserializedData , {
+				v: Object.assign( new ZeClass() , {
+					a: 4 ,
+					b: 7 ,
+					arg1: "arg1" ,
+					arg2: 2
+				} ) ,
+				v2: Object.assign( new ZeClass() , {
+					a: 5 ,
+					b: 8 ,
+					arg1: { arg: 1 } ,
+					arg2: [ 2 ]
+				} )
+			} ) ;
+			
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { universal: universal } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal , context: "bob" } ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			
+			doormen.equals( unserializedData , {
+				v: Object.assign( new ZeClass() , {
+					a: 4 ,
+					b: 7 ,
+					arg1: "arg1" ,
+					arg2: 2 ,
+					ctx: "bob"
+				} ) ,
+				v2: Object.assign( new ZeClass() , {
+					a: 5 ,
+					b: 8 ,
+					arg1: { arg: 1 } ,
+					arg2: [ 2 ] ,
+					ctx: "bob"
+				} )
+			} ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+		
+		done() ;
+	} ) ;
+
 	it( "constructed instances, test the Date object" , async( done ) => {
 
 		var options = {
@@ -666,7 +745,7 @@ describe( "Instances" , () => {
 						return new Date( arg ) ;
 					} ,
 					serializer: function( value ) {
-						return [ value.getTime() , null ] ;
+						return { args: [ value.getTime() ] } ;
 					}
 				}
 			}
@@ -753,7 +832,7 @@ describe( "Instances" , () => {
 			this.b = b ;
 		}
 
-		ZeClass.serializer = function( object ) { return [ object.a , object.b , null ] ; } ;
+		ZeClass.serializer = function( object ) { return { args: [ object.a , object.b ] } ; } ;
 		
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
@@ -1005,7 +1084,7 @@ describe( "References and relational structures" , () => {
 						delete clone.arg1 ;
 						delete clone.arg2 ;
 
-						return [ obj.arg1 , obj.arg2 , clone ] ;
+						return { args: [ obj.arg1 , obj.arg2 ] , overide: clone } ;
 					} ,
 					unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 				}
