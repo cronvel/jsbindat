@@ -1039,6 +1039,8 @@ describe( "Instances" , () => {
 			//doormen.equals( Object.getPrototypeOf( udata.object ) === Object.getPrototypeOf( udata.object3 ) , true ) ;
 		} ).then( done , done ) ;
 	} ) ;
+	
+	it( "'unserializeFinalizer' option" ) ;
 } ) ;
 
 
