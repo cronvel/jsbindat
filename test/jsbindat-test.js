@@ -628,7 +628,7 @@ describe( "Instances" , () => {
 			} ) ;
 			
 			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { classMap: classMap } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap , context: "bob" } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap } , "bob" ) ;
 			//deb( "unserializedData:" , unserializedData ) ;
 			
 			doormen.equals( unserializedData , {
@@ -723,7 +723,7 @@ describe( "Instances" , () => {
 			} ) ;
 			
 			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { universal: universal } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal , context: "bob" } ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal } , "bob" ) ;
 			//deb( "unserializedData:" , unserializedData ) ;
 			
 			doormen.equals( unserializedData , {
