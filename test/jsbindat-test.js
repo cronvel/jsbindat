@@ -669,13 +669,29 @@ describe( "Instances" , () => {
 
 		var universal = {
 			serializer: function( obj ) {
-				return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
+				var proto = Object.getPrototypeOf( obj ) ;
+				var className = proto === ZeClass.prototype ? 'ZeClass' : '' ;
+				
+				return {
+					className: className ,
+					args: [ obj.arg1 , obj.arg2 ] ,
+					overide: { a: obj.a , b: obj.b }
+				} ;
 			} ,
-			unserializer: function( ctx , arg1 , arg2 ) {
-				var object = new ZeClass( arg1 , arg2 ) ;
+			unserializer: function( ctx , className , arg1 , arg2 ) {
+				var object ;
+				
+				if ( className === 'ZeClass' ) {
+					object = new ZeClass( arg1 , arg2 ) ;
+				}
+				else {
+					object = {} ;
+				}
+				
 				if ( ctx ) { object.ctx = ctx ; }
 				return object ;
 			} ,
+			unserializeClassName: true ,
 			unserializeContext: true
 		} ;
 
