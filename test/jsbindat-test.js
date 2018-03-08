@@ -381,6 +381,34 @@ describe( "basic serialization/unserialization features" , () => {
 		} ).then( done , done ) ;
 	} ) ;
 
+	it( "Functions in structure should be set to undefined" , async ( done ) => {
+		var data = {
+			a: 1 ,
+			fn: function() {} ,
+			b: 2
+		} ;
+
+		try {
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			
+			doormen.equals( unserializedData , {
+				a: 1 ,
+				b: 2
+			} ) ;
+			
+			doormen.equals( unserializedData.fn === undefined , true ) ;
+			doormen.equals( 'fn' in unserializedData , true ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+		
+		done() ;
+	} ) ;
+	
 	it( "real-world test" , ( done ) => {
 
 		mutualTest( require( '../sample/sample1.json' ) ).then( done , done ) ;
