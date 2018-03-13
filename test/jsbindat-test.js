@@ -567,6 +567,47 @@ describe( "Instances" , () => {
 		} ).then( done , done ) ;
 	} ) ;
 
+	it( "constructed instances, using 'overideKeys'" , async ( done ) => {
+
+		function ZeClass() {
+			this.a = 4 ;
+			this.b = 7 ;
+		}
+
+		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
+		var options = {
+			classMap: {
+				ZeClass: {
+					prototype: ZeClass.prototype ,
+					serializer: function( obj ) { return { overide: obj , overideKeys: [ 'a' , 'c' ] } ; } ,
+					unserializer: function() { return new ZeClass() ; }
+				}
+			}
+		} ;
+
+		var data = new ZeClass() ;
+		data.a = 12 ;
+		data.b = 18 ;
+
+		try {
+			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , options ) ;
+			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , options ) ;
+			//deb( "unserializedData:" , unserializedData ) ;
+			
+			doormen.equals( unserializedData , Object.assign( new ZeClass() , {
+				a: 12 ,
+				b: 7
+			} ) ) ;
+		}
+		catch ( error ) {
+			done( error ) ;
+			return ;
+		}
+		
+		done() ;
+	} ) ;
+	
 	it( "constructed instances, using a regular function as constructor, with arguments" , ( done ) => {
 
 		function ZeClass( arg1 , arg2 ) {
