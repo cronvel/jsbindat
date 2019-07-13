@@ -28,13 +28,12 @@
 
 
 
-var fs = require( 'fs' ) ;
-var jsbindat = require( '../lib/jsbindat.js' ) ;
-var ClassMap = jsbindat.ClassMap ;
-//var expect = require( 'expect.js' ) ;
-var doormen = require( 'doormen' ) ;
-var Promise = require( 'seventh' ) ;
-var string = require( 'string-kit' ) ;
+const fs = require( 'fs' ) ;
+const jsbindat = require( '..' ) ;
+const ClassMap = jsbindat.ClassMap ;
+//const expect = require( 'expect.js' ) ;
+const Promise = require( 'seventh' ) ;
+const string = require( 'string-kit' ) ;
 
 
 
@@ -58,7 +57,7 @@ function deb( title , v ) {
 
 
 
-async function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb ) {
+async function mutualTest( originalData , serializerOptions , unserializerOptions , extraTestCb , useLike ) {
 	var data ;
 
 	// Manage arguments
@@ -83,12 +82,17 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 		//console.log( 'after' ) ;
 		//deb( 'data' , data ) ;
 
-		doormen.equals( data , originalData ) ;
+		if ( useLike ) {
+			expect( data ).to.be.like( originalData ) ;
+		}
+		else {
+			expect( data ).to.equal( originalData ) ;
+		}
 
 		if ( originalData && typeof originalData === 'object' ) {
 			//console.log( Object.getPrototypeOf( data ).constructor.name ) ;
 			//console.log( data ) ;
-			doormen.equals( Object.getPrototypeOf( data ) === Object.getPrototypeOf( originalData ) , true ) ;
+			expect( Object.getPrototypeOf( data ) ).to.be( Object.getPrototypeOf( originalData ) ) ;
 		}
 
 	}
@@ -113,155 +117,106 @@ async function mutualTest( originalData , serializerOptions , unserializerOption
 
 describe( "basic serialization/unserialization features" , () => {
 
-	it( "undefined" , ( done ) => {
-		mutualTest( undefined ).then( done , done ) ;
+	it( "undefined" , async () => {
+		await mutualTest( undefined ) ;
 	} ) ;
 
-	it( "null" , ( done ) => {
-		mutualTest( null ).then( done , done ) ;
+	it( "null" , async () => {
+		await mutualTest( null ) ;
 	} ) ;
 
-	it( "false" , ( done ) => {
-		mutualTest( false ).then( done , done ) ;
+	it( "false" , async () => {
+		await mutualTest( false ) ;
 	} ) ;
 
-	it( "true" , ( done ) => {
-		mutualTest( true ).then( done , done ) ;
+	it( "true" , async () => {
+		await mutualTest( true ) ;
 	} ) ;
 
-	it( "numbers" , async( done ) => {
-
-		try {
-			await mutualTest( 0 ) ;
-			await mutualTest( 1 ) ;
-			await mutualTest( -1 ) ;
-			await mutualTest( 123 ) ;
-			await mutualTest( 127 ) ;
-			await mutualTest( 128 ) ;
-			await mutualTest( -127 ) ;
-			await mutualTest( -128 ) ;
-			await mutualTest( 255 ) ;
-			await mutualTest( 256 ) ;
-			await mutualTest( 32767 ) ;
-			await mutualTest( 32768 ) ;
-			await mutualTest( 65535 ) ;
-			await mutualTest( 65536 ) ;
-			await mutualTest( -32768 ) ;
-			await mutualTest( -32769 ) ;
-			await mutualTest( 123456789 ) ;
-			await mutualTest( 2147483647 ) ;
-			await mutualTest( 2147483648 ) ;
-			await mutualTest( 4294967295 ) ;
-			await mutualTest( 4294967296 ) ;
-			await mutualTest( -2147483648 ) ;
-			await mutualTest( -2147483649 ) ;
-			await mutualTest( 21474836480 ) ;
-			await mutualTest( -21474836480 ) ;
-			await mutualTest( 0.123 ) ;
-			await mutualTest( 123.456 ) ;
-			await mutualTest( -123456789 ) ;
-			await mutualTest( -0.123 ) ;
-			await mutualTest( -123.456 ) ;
-			await mutualTest( 0.000000001 ) ;
-			await mutualTest( -0.000000001 ) ;
-			await mutualTest( Math.PI ) ;
-			await mutualTest( -Math.PI ) ;
-			await mutualTest( NaN ) ;
-			await mutualTest( Infinity ) ;
-			await mutualTest( -Infinity ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+	it( "numbers" , async () => {
+		await mutualTest( 0 ) ;
+		await mutualTest( 1 ) ;
+		await mutualTest( -1 ) ;
+		await mutualTest( 123 ) ;
+		await mutualTest( 127 ) ;
+		await mutualTest( 128 ) ;
+		await mutualTest( -127 ) ;
+		await mutualTest( -128 ) ;
+		await mutualTest( 255 ) ;
+		await mutualTest( 256 ) ;
+		await mutualTest( 32767 ) ;
+		await mutualTest( 32768 ) ;
+		await mutualTest( 65535 ) ;
+		await mutualTest( 65536 ) ;
+		await mutualTest( -32768 ) ;
+		await mutualTest( -32769 ) ;
+		await mutualTest( 123456789 ) ;
+		await mutualTest( 2147483647 ) ;
+		await mutualTest( 2147483648 ) ;
+		await mutualTest( 4294967295 ) ;
+		await mutualTest( 4294967296 ) ;
+		await mutualTest( -2147483648 ) ;
+		await mutualTest( -2147483649 ) ;
+		await mutualTest( 21474836480 ) ;
+		await mutualTest( -21474836480 ) ;
+		await mutualTest( 0.123 ) ;
+		await mutualTest( 123.456 ) ;
+		await mutualTest( -123456789 ) ;
+		await mutualTest( -0.123 ) ;
+		await mutualTest( -123.456 ) ;
+		await mutualTest( 0.000000001 ) ;
+		await mutualTest( -0.000000001 ) ;
+		await mutualTest( Math.PI ) ;
+		await mutualTest( -Math.PI ) ;
+		await mutualTest( NaN ) ;
+		await mutualTest( Infinity ) ;
+		await mutualTest( -Infinity ) ;
 	} ) ;
 
-	it( "strings" , async( done ) => {
-
-		try {
-			await mutualTest( '' ) ;
-			await mutualTest( 'a' ) ;
-			await mutualTest( 'a string' ) ;
-			await mutualTest( 'a'.repeat( 32 ) ) ;
-			//*
-			await mutualTest( 'a'.repeat( 64 ) ) ;
-			await mutualTest( 'a'.repeat( 128 ) ) ;
-			await mutualTest( 'a'.repeat( 256 ) ) ;
-			await mutualTest( 'a'.repeat( 512 ) ) ;
-			await mutualTest( 'this is a really really really big big big string!'.repeat( 100 ) ) ;
-			await mutualTest( 'this is a really really really big big big string!'.repeat( 2000 ) ) ;
-			await mutualTest( 'this is a really really really big big big string!'.repeat( 200000 ) ) ;
-			//*/
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+	it( "strings" , async () => {
+		await mutualTest( '' ) ;
+		await mutualTest( 'a' ) ;
+		await mutualTest( 'a string' ) ;
+		await mutualTest( 'a'.repeat( 32 ) ) ;
+		await mutualTest( 'a'.repeat( 64 ) ) ;
+		await mutualTest( 'a'.repeat( 128 ) ) ;
+		await mutualTest( 'a'.repeat( 256 ) ) ;
+		await mutualTest( 'a'.repeat( 512 ) ) ;
+		await mutualTest( 'this is a really really really big big big string!'.repeat( 100 ) ) ;
+		await mutualTest( 'this is a really really really big big big string!'.repeat( 2000 ) ) ;
+		await mutualTest( 'this is a really really really big big big string!'.repeat( 200000 ) ) ;
 	} ) ;
 
-	it( "arrays" , async( done ) => {
-
-		try {
-			await mutualTest( [] ) ;
-			await mutualTest( [ true , false ] ) ;
-			await mutualTest( [ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ] ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+	it( "arrays" , async () => {
+		await mutualTest( [] ) ;
+		await mutualTest( [ true , false ] ) ;
+		await mutualTest( [ 1 , 2 , 3 , true , false , null , 'a string' , 'another string' ] ) ;
 	} ) ;
 
-	it( "ES6 Set" , async( done ) => {
+	it( "ES6 Set" , async () => {
+		var set_ ;
 
-		var set ;
+		await mutualTest( new Set() ) ;
+		set_ = new Set() ;
+		set_.add( 1 ) ;
+		set_.add( "bob" ) ;
+		await mutualTest( set_ ) ;
 
-		try {
-			await mutualTest( new Set() ) ;
-
-			set = new Set() ;
-			set.add( 1 ) ;
-			set.add( "bob" ) ;
-			await mutualTest( set ) ;
-
-			set = new Set() ;
-			set.add( { a: 1 } ) ;
-			set.add( { b: 2 } ) ;
-			await mutualTest( set ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+		set_ = new Set() ;
+		set_.add( { a: 1 } ) ;
+		set_.add( { b: 2 } ) ;
+		await mutualTest( set_ ) ;
 	} ) ;
 
-	it( "nested arrays" , async( done ) => {
-
-		try {
-			await mutualTest( [
-				[ 1 , 2 , 3 ] ,
-				[ true , false ] ,
-				[ null , 'another string' , 'this is a really really really big big big string!'.repeat( 100 ) , 'a string' ]
-			] ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+	it( "nested arrays" , async () => {
+		await mutualTest( [
+			[ 1 , 2 , 3 ] ,
+			[ true , false ] ,
+			[ null , 'another string' , 'this is a really really really big big big string!'.repeat( 100 ) , 'a string' ]
+		] ) ;
 	} ) ;
 
-	it( "objects" , async( done ) => {
-
+	it( "objects" , async () => {
 		var big = 'this is a really really really big big big string!'.repeat( 100 ) ;
 
 		var bigKeyObject = {
@@ -270,41 +225,23 @@ describe( "basic serialization/unserialization features" , () => {
 		bigKeyObject[ big ] = big ;
 		bigKeyObject.notbig = 'notbigstring' ;
 
-		try {
-			await mutualTest( {} ) ;
-			await mutualTest( { a: 1 , b: 2 } ) ;
-			await mutualTest( {
-				a: 1 , b: 2 , c: true , d: 'a string' , f: 'big' , abcdefghijklmnopq: true , g: 'gee'
-			} ) ;
-			await mutualTest( bigKeyObject ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+		await mutualTest( {} ) ;
+		await mutualTest( { a: 1 , b: 2 } ) ;
+		await mutualTest( {
+			a: 1 , b: 2 , c: true , d: 'a string' , f: 'big' , abcdefghijklmnopq: true , g: 'gee'
+		} ) ;
+		await mutualTest( bigKeyObject ) ;
 	} ) ;
 
-	it( "nested objects" , async( done ) => {
-
-		try {
-			await mutualTest( {
-				sub: { a: 1 , sub: {} } ,
-				sub2: { b: 2 , sub: { sub: { sub: { c: 3 } } } } ,
-				d: 4
-			} ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+	it( "nested objects" , async () => {
+		await mutualTest( {
+			sub: { a: 1 , sub: {} } ,
+			sub2: { b: 2 , sub: { sub: { sub: { c: 3 } } } } ,
+			d: 4
+		} ) ;
 	} ) ;
 
-	it( "nested arrays and objects" , async( done ) => {
-
+	it( "nested arrays and objects" , async () => {
 		var samples = [
 			{
 				sub: [ 1 , {} ] ,
@@ -318,100 +255,65 @@ describe( "basic serialization/unserialization features" , () => {
 			]
 		] ;
 
-		try {
-			await mutualTest( {
-				sub: [ 1 , {} ] ,
-				sub2: [ 2 , { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
-				d: 4
-			} ) ;
-			await mutualTest( [
-				[ 1 , {} ] ,
-				{ b: 2 , sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
-				4
-			] ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+		await mutualTest( {
+			sub: [ 1 , {} ] ,
+			sub2: [ 2 , { sub: { sub: { c: [ 1 , 2 , 3 ] } } } ] ,
+			d: 4
+		} ) ;
+		await mutualTest( [
+			[ 1 , {} ] ,
+			{ b: 2 , sub: { sub: { sub: { c: [ 1 , 2 , 3 ] } } } } ,
+			4
+		] ) ;
 	} ) ;
 
-	it( "ES6 Map" , async( done ) => {
-
+	it( "ES6 Map" , async () => {
 		var map ;
 
-		try {
-			await mutualTest( new Map() ) ;
+		await mutualTest( new Map() ) ;
 
-			map = new Map() ;
-			map.set( { jack: '2' } , 1 ) ;
-			map.set( "bob" , "bill" ) ;
-			map.set( { keyKey: 'value of key' } , { valueKey: 'value of value' } ) ;
-			await mutualTest( map ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+		map = new Map() ;
+		map.set( { jack: '2' } , 1 ) ;
+		map.set( "bob" , "bill" ) ;
+		map.set( { keyKey: 'value of key' } , { valueKey: 'value of value' } ) ;
+		await mutualTest( map ) ;
 	} ) ;
 
-	it( "Buffer" , async( done ) => {
-
-		try {
-			// Let allocUnsafe() create some garbage data...
-			await mutualTest( Buffer.allocUnsafe( 10 ) ) ;
-			await mutualTest( Buffer.allocUnsafe( 100 ) ) ;
-			await mutualTest( Buffer.allocUnsafe( 1000000 ) ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+	it( "Buffer" , async () => {
+		// Let allocUnsafe() create some garbage data...
+		await mutualTest( Buffer.allocUnsafe( 10 ) ) ;
+		await mutualTest( Buffer.allocUnsafe( 100 ) ) ;
+		await mutualTest( Buffer.allocUnsafe( 1000000 ) ) ;
 	} ) ;
 
-	it( "Object.prototype" , ( done ) => {
-		mutualTest( Object.prototype , null , null , udata => {
-			doormen.equals( udata === Object.prototype , true ) ;
-		} ).then( done , done ) ;
+	it( "Object.prototype" , async () => {
+		await mutualTest( Object.prototype , null , null , udata => {
+			expect( udata ).to.be( Object.prototype ) ;
+		} ) ;
 	} ) ;
 
-	it( "Functions in structure should be set to undefined" , async ( done ) => {
+	it( "Functions in structure should be set to undefined" , async () => {
 		var data = {
 			a: 1 ,
 			fn: function() {} ,
 			b: 2
 		} ;
 
-		try {
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			
-			doormen.equals( unserializedData , {
-				a: 1 ,
-				b: 2
-			} ) ;
-			
-			doormen.equals( unserializedData.fn === undefined , true ) ;
-			doormen.equals( 'fn' in unserializedData , true ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
 		
-		done() ;
+		expect( unserializedData ).to.equal( {
+			a: 1 ,
+			b: 2
+		} ) ;
+		
+		expect( unserializedData.fn ).to.be.undefined() ;
+		expect( unserializedData ).to.have.property( 'fn' ) ;
 	} ) ;
 	
-	it( "real-world test" , ( done ) => {
-
-		mutualTest( require( '../sample/sample1.json' ) ).then( done , done ) ;
+	it( "real-world test" , async () => {
+		await mutualTest( require( '../sample/sample1.json' ) ) ;
 	} ) ;
 } ) ;
 
@@ -419,8 +321,7 @@ describe( "basic serialization/unserialization features" , () => {
 
 describe( "Instances" , () => {
 
-	it( "empty instances without constructor" , async( done ) => {
-
+	it( "empty instances without constructor" , async () => {
 		function ZeClass() {}
 
 		ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
@@ -437,14 +338,13 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 
-		mutualTest( data , options , options , udata => {
+		await mutualTest( data , options , options , udata => {
 			//console.log( 'udata: ' , udata ) ;
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} ).then( done , done ) ;
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+		} ) ;
 	} ) ;
 
-	it( "instances without constructor" , async( done ) => {
-
+	it( "instances without constructor" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -464,14 +364,13 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 
-		mutualTest( data , options , options , udata => {
+		await mutualTest( data , options , options , udata => {
 			//console.log( 'udata: ' , udata ) ;
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} ).then( done , done ) ;
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+		} ) ;
 	} ) ;
 
-	it( "constructed instances, using a 'new' type of constructor" , ( done ) => {
-
+	it( "constructed instances, using a 'new' type of constructor" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -496,14 +395,13 @@ describe( "Instances" , () => {
 
 		data.v2.inc() ;
 
-		mutualTest( data , options , options , udata => {
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
-		} ).then( done , done ) ;
+		await mutualTest( data , options , options , udata => {
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			expect( Object.getPrototypeOf( udata.v2 ) ).to.be( ZeClass.prototype ) ;
+		} ) ;
 	} ) ;
 
-	it( "constructed instances, using a 'new' type of constructor with arguments" , ( done ) => {
-
+	it( "constructed instances, using a 'new' type of constructor with arguments" , async () => {
 		function ZeClass( arg1 , arg2 ) {
 			this.arg1 = arg1 ;
 			this.arg2 = arg2 ;
@@ -530,14 +428,12 @@ describe( "Instances" , () => {
 
 		data.v2.inc() ;
 
-
-		mutualTest( data , options , options , ( udata ) => {
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} ).then( done , done ) ;
+		await mutualTest( data , options , options , ( udata ) => {
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+		} ) ;
 	} ) ;
 
-	it( "constructed instances, using a regular function as constructor" , ( done ) => {
-
+	it( "constructed instances, using a regular function as constructor" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -562,13 +458,12 @@ describe( "Instances" , () => {
 
 		data.v2.inc() ;
 
-		mutualTest( data , options , options , ( udata ) => {
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} ).then( done , done ) ;
+		await mutualTest( data , options , options , ( udata ) => {
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+		} ) ;
 	} ) ;
 
-	it( "constructed instances, using 'overideKeys' and 'overide'" , async ( done ) => {
-
+	it( "constructed instances, using 'overideKeys' and 'overide'" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -590,26 +485,17 @@ describe( "Instances" , () => {
 		data.a = 12 ;
 		data.b = 18 ;
 
-		try {
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , options ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , options ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			
-			doormen.equals( unserializedData , Object.assign( new ZeClass() , {
-				a: 12 ,
-				b: 7
-			} ) ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , options ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , options ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
 		
-		done() ;
+		expect( unserializedData ).to.equal( Object.assign( new ZeClass() , {
+			a: 12 ,
+			b: 7
+		} ) ) ;
 	} ) ;
 
-	it( "constructed instances, using 'overideKeys' without 'overide'" , async ( done ) => {
-
+	it( "constructed instances, using 'overideKeys' without 'overide'" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -631,26 +517,17 @@ describe( "Instances" , () => {
 		data.a = 12 ;
 		data.b = 18 ;
 
-		try {
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , options ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , options ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			
-			doormen.equals( unserializedData , Object.assign( new ZeClass() , {
-				a: 12 ,
-				b: 7
-			} ) ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , options ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , options ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
 		
-		done() ;
+		expect( unserializedData ).to.equal( Object.assign( new ZeClass() , {
+			a: 12 ,
+			b: 7
+		} ) ) ;
 	} ) ;
 	
-	it( "constructed instances, using a regular function as constructor, with arguments" , ( done ) => {
-
+	it( "constructed instances, using a regular function as constructor, with arguments" , async () => {
 		function ZeClass( arg1 , arg2 ) {
 			this.arg1 = arg1 ;
 			this.arg2 = arg2 ;
@@ -679,13 +556,12 @@ describe( "Instances" , () => {
 
 		data.v2.inc() ;
 
-		mutualTest( data , options , options , ( udata ) => {
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} ).then( done , done ) ;
+		await mutualTest( data , options , options , ( udata ) => {
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+		} ) ;
 	} ) ;
 
-	it( "constructed instances, with the 'unserializeContext' option" , async ( done ) => {
-
+	it( "constructed instances, with the 'unserializeContext' option" , async () => {
 		function ZeClass( arg1 , arg2 ) {
 			this.arg1 = arg1 ;
 			this.arg2 = arg2 ;
@@ -717,57 +593,48 @@ describe( "Instances" , () => {
 
 		data.v2.inc() ;
 
-		try {
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { classMap: classMap } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap } ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			
-			doormen.equals( unserializedData , {
-				v: Object.assign( new ZeClass() , {
-					a: 4 ,
-					b: 7 ,
-					arg1: "arg1" ,
-					arg2: 2
-				} ) ,
-				v2: Object.assign( new ZeClass() , {
-					a: 5 ,
-					b: 8 ,
-					arg1: { arg: 1 } ,
-					arg2: [ 2 ]
-				} )
-			} ) ;
-			
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { classMap: classMap } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap } , "bob" ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			
-			doormen.equals( unserializedData , {
-				v: Object.assign( new ZeClass() , {
-					a: 4 ,
-					b: 7 ,
-					arg1: "arg1" ,
-					arg2: 2 ,
-					ctx: "bob"
-				} ) ,
-				v2: Object.assign( new ZeClass() , {
-					a: 5 ,
-					b: 8 ,
-					arg1: { arg: 1 } ,
-					arg2: [ 2 ] ,
-					ctx: "bob"
-				} )
-			} ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { classMap: classMap } ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap } ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
 		
-		done() ;
+		expect( unserializedData ).to.equal( {
+			v: Object.assign( new ZeClass() , {
+				a: 4 ,
+				b: 7 ,
+				arg1: "arg1" ,
+				arg2: 2
+			} ) ,
+			v2: Object.assign( new ZeClass() , {
+				a: 5 ,
+				b: 8 ,
+				arg1: { arg: 1 } ,
+				arg2: [ 2 ]
+			} )
+		} ) ;
+		
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { classMap: classMap } ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { classMap: classMap } , "bob" ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
+		
+		expect( unserializedData ).to.equal( {
+			v: Object.assign( new ZeClass() , {
+				a: 4 ,
+				b: 7 ,
+				arg1: "arg1" ,
+				arg2: 2 ,
+				ctx: "bob"
+			} ) ,
+			v2: Object.assign( new ZeClass() , {
+				a: 5 ,
+				b: 8 ,
+				arg1: { arg: 1 } ,
+				arg2: [ 2 ] ,
+				ctx: "bob"
+			} )
+		} ) ;
 	} ) ;
 
-	it( "constructed instances, with the 'universal' serializer/unserializer option" , async ( done ) => {
-
+	it( "constructed instances, with the 'universal' serializer/unserializer option" , async () => {
 		function ZeClass( arg1 , arg2 ) {
 			this.arg1 = arg1 ;
 			this.arg2 = arg2 ;
@@ -812,57 +679,48 @@ describe( "Instances" , () => {
 
 		data.v2.inc() ;
 
-		try {
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { universal: universal } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal } ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			
-			doormen.equals( unserializedData , {
-				v: Object.assign( new ZeClass() , {
-					a: 4 ,
-					b: 7 ,
-					arg1: "arg1" ,
-					arg2: 2
-				} ) ,
-				v2: Object.assign( new ZeClass() , {
-					a: 5 ,
-					b: 8 ,
-					arg1: { arg: 1 } ,
-					arg2: [ 2 ]
-				} )
-			} ) ;
-			
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { universal: universal } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal } , "bob" ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			
-			doormen.equals( unserializedData , {
-				v: Object.assign( new ZeClass() , {
-					a: 4 ,
-					b: 7 ,
-					arg1: "arg1" ,
-					arg2: 2 ,
-					ctx: "bob"
-				} ) ,
-				v2: Object.assign( new ZeClass() , {
-					a: 5 ,
-					b: 8 ,
-					arg1: { arg: 1 } ,
-					arg2: [ 2 ] ,
-					ctx: "bob"
-				} )
-			} ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { universal: universal } ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal } ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
 		
-		done() ;
+		expect( unserializedData ).to.equal( {
+			v: Object.assign( new ZeClass() , {
+				a: 4 ,
+				b: 7 ,
+				arg1: "arg1" ,
+				arg2: 2
+			} ) ,
+			v2: Object.assign( new ZeClass() , {
+				a: 5 ,
+				b: 8 ,
+				arg1: { arg: 1 } ,
+				arg2: [ 2 ]
+			} )
+		} ) ;
+		
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { universal: universal } ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { universal: universal } , "bob" ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
+		
+		expect( unserializedData ).to.equal( {
+			v: Object.assign( new ZeClass() , {
+				a: 4 ,
+				b: 7 ,
+				arg1: "arg1" ,
+				arg2: 2 ,
+				ctx: "bob"
+			} ) ,
+			v2: Object.assign( new ZeClass() , {
+				a: 5 ,
+				b: 8 ,
+				arg1: { arg: 1 } ,
+				arg2: [ 2 ] ,
+				ctx: "bob"
+			} )
+		} ) ;
 	} ) ;
 
-	it( "constructed instances, test the Date object" , async( done ) => {
-
+	it( "constructed instances, test the Date object" , async () => {
 		var options = {
 			classMap: {
 				Date: {
@@ -877,20 +735,12 @@ describe( "Instances" , () => {
 			}
 		} ;
 
-		try {
-			await mutualTest( new Date() , options , options ) ;
-			await mutualTest( [ new Date() , new Date() , new Date() ] , options , options ) ;
-			await mutualTest( { a: new Date() , b: new Date() , c: new Date() } , options , options ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-
-		done() ;
+		await mutualTest( new Date() , options , options ) ;
+		await mutualTest( [ new Date() , new Date() , new Date() ] , options , options ) ;
+		await mutualTest( { a: new Date() , b: new Date() , c: new Date() } , options , options ) ;
 	} ) ;
 	
-	it( "Serializer 'autoInstance' option" , async( done ) => {
+	it( "Serializer 'autoInstance' option" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -912,13 +762,13 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 
-		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+		await mutualTest( data , serializerOptions , unserializerOptions , udata => {
 			//console.log( 'udata: ' , udata ) ;
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-		} ).then( done , done ) ;
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+		} ) ;
 	} ) ;
 	
-	it( "Unserializer 'enableUnknown' option" , async( done ) => {
+	it( "Unserializer 'enableUnknown' option" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -932,27 +782,19 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 		
-		try {
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { autoInstance: true } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { enableUnknown: true } ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			doormen.equals( unserializedData , {
-				v: {
-					__className__: "ZeClass" ,
-					a: 4 ,
-					b: 7
-				}
-			} ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-		
-		done() ;
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { autoInstance: true } ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { enableUnknown: true } ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
+		expect( unserializedData ).to.be.like( {
+			v: {
+				__className__: "ZeClass" ,
+				a: 4 ,
+				b: 7
+			}
+		} ) ;
 	} ) ;
 	
-	it( "'autoInstance' with a .serializer() class method and 'enableUnknown'" , async( done ) => {
+	it( "'autoInstance' with a .serializer() class method and 'enableUnknown'" , async () => {
 		function ZeClass( a = 4 , b = 7 ) {
 			this.a = a ;
 			this.b = b ;
@@ -968,27 +810,18 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 		
-		try {
-			await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { autoInstance: true } ) ;
-			var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { enableUnknown: true } ) ;
-			//deb( "unserializedData:" , unserializedData ) ;
-			doormen.equals( unserializedData , {
-				v: {
-					__constructorArgs__: [ 4 , 7 ] ,
-					__className__: "ZeClass"
-				}
-			} ) ;
-		}
-		catch ( error ) {
-			done( error ) ;
-			return ;
-		}
-		
-		done() ;
+		await jsbindat.writeFile( __dirname + '/out.jsdat' , data , { autoInstance: true } ) ;
+		var unserializedData = await jsbindat.readFile( __dirname + '/out.jsdat' , { enableUnknown: true } ) ;
+		//deb( "unserializedData:" , unserializedData ) ;
+		expect( unserializedData ).to.be.like( {
+			v: {
+				__constructorArgs__: [ 4 , 7 ] ,
+				__className__: "ZeClass"
+			}
+		} ) ;
 	} ) ;
 	
-	it( "Serializer 'prototypeChain' option and prototyped object (inheritance)" , async ( done ) => {
-		
+	it( "Serializer 'prototypeChain' option and prototyped object (inheritance)" , async () => {
 		var parent = {
 			a: 1 ,
 			b: 2
@@ -1006,16 +839,15 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 
-		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+		await mutualTest( data , serializerOptions , unserializerOptions , udata => {
 			//console.log( 'udata: ' , udata ) ;
 			//console.log( "udata.object's prototype: " , Object.getPrototypeOf( udata.object ) ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object ) , parent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object ) ) , Object.prototype ) ;
-		} ).then( done , done ) ;
+			expect( Object.getPrototypeOf( udata.object ) ).to.equal( parent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object ) ) ).to.be( Object.prototype ) ;
+		} , true ) ;
 	} ) ;
 	
-	it( "Serializer 'prototypeChain' option and multiple object sharing the same prototype" , async ( done ) => {
-		
+	it( "Serializer 'prototypeChain' option and multiple object sharing the same prototype" , async () => {
 		var parent = {
 			a: 1 ,
 			b: 2
@@ -1041,23 +873,22 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 
-		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+		await mutualTest( data , serializerOptions , unserializerOptions , udata => {
 			//console.log( 'udata: ' , udata ) ;
 			//console.log( "udata.object's prototype: " , Object.getPrototypeOf( udata.object ) ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object ) , parent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object ) ) , Object.prototype ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object2 ) , parent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) , Object.prototype ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object3 ) , parent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) , Object.prototype ) ;
+			expect( Object.getPrototypeOf( udata.object ) ).to.equal( parent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object ) ) ).to.be( Object.prototype ) ;
+			expect( Object.getPrototypeOf( udata.object2 ) ).to.equal( parent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) ).to.be( Object.prototype ) ;
+			expect( Object.getPrototypeOf( udata.object3 ) ).to.equal( parent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) ).to.be( Object.prototype ) ;
 			
-			doormen.equals( Object.getPrototypeOf( udata.object ) === Object.getPrototypeOf( udata.object2 ) , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object ) === Object.getPrototypeOf( udata.object3 ) , true ) ;
-		} ).then( done , done ) ;
+			expect( Object.getPrototypeOf( udata.object ) ).to.be( Object.getPrototypeOf( udata.object2 ) ) ;
+			expect( Object.getPrototypeOf( udata.object ) ).to.be( Object.getPrototypeOf( udata.object3 ) ) ;
+		} , true ) ;
 	} ) ;
 	
-	it( "Serializer 'prototypeChain' option and prototype chain" , async ( done ) => {
-		
+	it( "Serializer 'prototypeChain' option and prototype chain" , async () => {
 		var grandParent = {
 			a: 1 ,
 			b: 2
@@ -1092,34 +923,33 @@ describe( "Instances" , () => {
 
 		//console.log( 'data: ' , data ) ;
 
-		mutualTest( data , serializerOptions , unserializerOptions , udata => {
+		await mutualTest( data , serializerOptions , unserializerOptions , udata => {
 			//console.log( 'udata: ' , udata ) ;
 			//console.log( "udata.object's prototype: " , Object.getPrototypeOf( udata.object ) ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object1 ) , parent1 ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object1 ) ) , grandParent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object1 ) ) ) === Object.prototype , true ) ;
+			expect( Object.getPrototypeOf( udata.object1 ) ).to.be.like( parent1 ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object1 ) ) ).to.be.like( grandParent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object1 ) ) ) ).to.be( Object.prototype ) ;
 			
-			doormen.equals( Object.getPrototypeOf( udata.object2 ) , parent1 ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) , grandParent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) ) === Object.prototype , true ) ;
+			expect( Object.getPrototypeOf( udata.object2 ) ).to.be.like( parent1 ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) ).to.be.like( grandParent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object2 ) ) ) ).to.be( Object.prototype ) ;
 			
-			doormen.equals( Object.getPrototypeOf( udata.object3 ) , parent2 ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) , grandParent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) ) === Object.prototype , true ) ;
+			expect( Object.getPrototypeOf( udata.object3 ) ).to.be.like( parent2 ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) ).to.be.like( grandParent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( Object.getPrototypeOf( udata.object3 ) ) ) ).to.be( Object.prototype ) ;
 			
-			doormen.equals( Object.getPrototypeOf( udata.object4 ) , grandParent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object4 ) ) === Object.prototype , true ) ;
+			expect( Object.getPrototypeOf( udata.object4 ) ).to.be.like( grandParent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object4 ) ) ).to.be( Object.prototype ) ;
 			
-			doormen.equals( Object.getPrototypeOf( udata.object5 ) , grandParent ) ;
-			doormen.equals( Object.getPrototypeOf( Object.getPrototypeOf( udata.object5 ) ) === Object.prototype , true ) ;
+			expect( Object.getPrototypeOf( udata.object5 ) ).to.be.like( grandParent ) ;
+			expect( Object.getPrototypeOf( Object.getPrototypeOf( udata.object5 ) ) ).to.be( Object.prototype ) ;
 			
-			doormen.equals( Object.getPrototypeOf( udata.object1 ) === udata.object4 , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object2 ) === udata.object4 , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object3 ) === udata.object5 , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object4 ) === udata.object0 , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.object5 ) === udata.object0 , true ) ;
-			//doormen.equals( Object.getPrototypeOf( udata.object ) === Object.getPrototypeOf( udata.object3 ) , true ) ;
-		} ).then( done , done ) ;
+			expect( Object.getPrototypeOf( udata.object1 ) ).to.be( udata.object4 ) ;
+			expect( Object.getPrototypeOf( udata.object2 ) ).to.be( udata.object4 ) ;
+			expect( Object.getPrototypeOf( udata.object3 ) ).to.be( udata.object5 ) ;
+			expect( Object.getPrototypeOf( udata.object4 ) ).to.be( udata.object0 ) ;
+			expect( Object.getPrototypeOf( udata.object5 ) ).to.be( udata.object0 ) ;
+		} , true ) ;
 	} ) ;
 	
 	it( "'unserializeFinalizer' option" ) ;
@@ -1129,8 +959,7 @@ describe( "Instances" , () => {
 
 describe( "References and relational structures" , () => {
 
-	it( "references (no duplicated object)" , ( done ) => {
-
+	it( "references (no duplicated object)" , async () => {
 		var data = {
 			doc1: { a: 1 , b: 2 } ,
 			doc2: { a: 4 , b: 7 } ,
@@ -1144,18 +973,17 @@ describe( "References and relational structures" , () => {
 		data.doc2.link = data.doc1 ;
 		data.doc5.mlinks = [ data.doc1 , data.doc3 , data ] ;
 
-		mutualTest( data , ( udata ) => {
-			doormen.equals( udata.circular === udata , true ) ;
-			doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
-			doormen.equals( udata.doc2.link === udata.doc1 , true ) ;
-			doormen.equals( udata.doc5.mlinks[ 0 ] === udata.doc1 , true ) ;
-			doormen.equals( udata.doc5.mlinks[ 1 ] === udata.doc3 , true ) ;
-			doormen.equals( udata.doc5.mlinks[ 2 ] === udata , true ) ;
-		} ).then( done , done ) ;
+		await mutualTest( data , ( udata ) => {
+			expect( udata.circular ).to.be( udata ) ;
+			expect( udata.doc2.link ).to.be( udata.doc1 ) ;
+			expect( udata.doc2.link ).to.be( udata.doc1 ) ;
+			expect( udata.doc5.mlinks[ 0 ] ).to.be( udata.doc1 ) ;
+			expect( udata.doc5.mlinks[ 1 ] ).to.be( udata.doc3 ) ;
+			expect( udata.doc5.mlinks[ 2 ] ).to.be( udata ) ;
+		} ) ;
 	} ) ;
 
-	it( "instances without constructor self referencing itself and other instances" , ( done ) => {
-
+	it( "instances without constructor self referencing itself and other instances" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -1181,19 +1009,18 @@ describe( "References and relational structures" , () => {
 		data.v2.v = data.v ;
 		data.v3 = data.v2 ;
 
-		mutualTest( data , options , options , ( udata ) => {
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
-			doormen.equals( udata.v.root === udata , true ) ;
-			doormen.equals( udata.v.self === udata.v , true ) ;
-			doormen.equals( udata.v.v2 === udata.v2 , true ) ;
-			doormen.equals( udata.v2.v === udata.v , true ) ;
-			doormen.equals( udata.v3 === udata.v2 , true ) ;
-		} ).then( done , done ) ;
+		await mutualTest( data , options , options , ( udata ) => {
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			expect( Object.getPrototypeOf( udata.v2 ) ).to.be( ZeClass.prototype ) ;
+			expect( udata.v.root ).to.be( udata ) ;
+			expect( udata.v.self ).to.be( udata.v ) ;
+			expect( udata.v.v2 ).to.be( udata.v2 ) ;
+			expect( udata.v2.v ).to.be( udata.v ) ;
+			expect( udata.v3 ).to.be( udata.v2 ) ;
+		} ) ;
 	} ) ;
 
-	it( "instances with constructor self referencing itself and other instances" , ( done ) => {
-
+	it( "instances with constructor self referencing itself and other instances" , async () => {
 		function ZeClass() {
 			this.a = 4 ;
 			this.b = 7 ;
@@ -1231,16 +1058,15 @@ describe( "References and relational structures" , () => {
 		data.v2.v = data.v ;
 		data.v3 = data.v2 ;
 
-		mutualTest( data , options , options , ( udata ) => {
-			doormen.equals( Object.getPrototypeOf( udata.v ) === ZeClass.prototype , true ) ;
-			doormen.equals( Object.getPrototypeOf( udata.v2 ) === ZeClass.prototype , true ) ;
-			doormen.equals( udata.v.root === udata , true ) ;
-			doormen.equals( udata.v.self === udata.v , true ) ;
-			doormen.equals( udata.v.v2 === udata.v2 , true ) ;
-			doormen.equals( udata.v2.v === udata.v , true ) ;
-			doormen.equals( udata.v3 === udata.v2 , true ) ;
-		} ).then( done , done ) ;
+		await mutualTest( data , options , options , ( udata ) => {
+			expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			expect( Object.getPrototypeOf( udata.v2 ) ).to.be( ZeClass.prototype ) ;
+			expect( udata.v.root ).to.be( udata ) ;
+			expect( udata.v.self ).to.be( udata.v ) ;
+			expect( udata.v.v2 ).to.be( udata.v2 ) ;
+			expect( udata.v2.v ).to.be( udata.v ) ;
+			expect( udata.v3 ).to.be( udata.v2 ) ;
+		} ) ;
 	} ) ;
 } ) ;
-
 

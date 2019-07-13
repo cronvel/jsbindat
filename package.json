@@ -1,6 +1,6 @@
 {
   "name": "jsbindat",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "Binary data serializer and unserializer for Node.js.",
   "main": "lib/jsbindat.js",
   "engines": {
@@ -11,14 +11,11 @@
     "bench": "bench"
   },
   "dependencies": {
-    "seventh": "^0.6.4",
-    "stream-kit": "^0.2.2"
+    "seventh": "^0.7.23",
+    "stream-kit": "^0.2.7"
   },
   "devDependencies": {
-    "doormen": "^0.6.10",
-    "expect.js": "^0.3.1",
-    "mocha": "^3.2.0",
-    "string-kit": "^0.6.9"
+    "string-kit": "^0.9.9"
   },
   "scripts": {
     "test": "tea-time -R dot"
