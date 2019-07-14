@@ -57,34 +57,3 @@ function deb( title , v ) {
 
 
 
-describe( "str-mode" , () => {
-
-	it( "misc" , () => {
-		console.log( jsbindat.strSerialize( undefined ) ) ;
-		console.log( jsbindat.strSerialize( null ) ) ;
-		console.log( jsbindat.strSerialize( true ) ) ;
-		console.log( jsbindat.strSerialize( 10 ) ) ;
-		console.log( jsbindat.strSerialize( 1.25487 ) ) ;
-		console.log( jsbindat.strSerialize( "Hello Bob!" ) ) ;
-		console.log( jsbindat.strSerialize( [ 1.25487 , "Bob!" , false , null , NaN ] ) ) ;
-		console.log( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , p1: false , p2: null , p3: NaN } ) ) ;
-		console.log( JSON.stringify( { number: 1.25487 , name: "Bob!" , p1: false , p2: null , p3: NaN } ) ) ;
-		console.log( jsbindat.strSerialize( new Date() ) ) ;
-		console.log( jsbindat.strSerialize( new Date() , { classMap: jsbindat.builtIn } ) ) ;
-		console.log( JSON.stringify( new Date() ) ) ;
-		console.log( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , array:[ {},[],[1,2,3],{a:1,b:2},{c:1,d:{e:3},f:4} ] } ) ) ;
-		console.log( jsbindat.strSerialize( { buf: Buffer.from( 'Hello Bob!' ) } ) ) ;
-
-		console.log( jsbindat.strUnserialize( jsbindat.strSerialize( 1.25487 ) ) ) ;
-		console.log( jsbindat.strUnserialize( jsbindat.strSerialize( "Hello Bob!" ) ) ) ;
-		console.log( jsbindat.strUnserialize( jsbindat.strSerialize( [ 1.25487 , "Bob!" , false , null , NaN ] ) ) ) ;
-		console.log( jsbindat.strUnserialize( jsbindat.strSerialize( new Date() , { classMap: jsbindat.builtIn } ) , { classMap: jsbindat.builtIn } ) ) ;
-		console.log( jsbindat.strUnserialize( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , p1: false , p2: null , p3: NaN } ) ) ) ;
-		console.log( jsbindat.strUnserialize( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , array:[ {},[],[1,2,3],{a:1,b:2},{c:1,d:{e:3},f:4} ] } ) ) ) ;
-		console.log( jsbindat.strUnserialize( jsbindat.strSerialize( { buf: Buffer.from( 'Hello Bob!' ) } ) ) ) ;
-	} ) ;
-	
-	it( "Code strUnserialize() functions marked with TODO???" ) ;
-	it( "Find a way to re-use binary tests" ) ;
-} ) ;
-
