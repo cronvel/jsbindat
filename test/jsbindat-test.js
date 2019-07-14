@@ -1115,7 +1115,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 
 
-//*
+/*
 it( "debug" , () => {
 	console.log( jsbindat.strSerialize( undefined ) ) ;
 	console.log( jsbindat.strSerialize( null ) ) ;
