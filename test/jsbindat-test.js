@@ -319,6 +319,14 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			await mutualTest( map ) ;
 		} ) ;
 
+		it( "Date" , async () => {
+			// Let allocUnsafe() create some garbage data...
+			var date = new Date( '2019-06-12T18:02:15Z' ) ;
+			await mutualTest( date ) ;
+			await mutualTest( { date } ) ;
+			await mutualTest( [ date , date , date ] ) ;
+		} ) ;
+
 		it( "Buffer" , async () => {
 			// Let allocUnsafe() create some garbage data...
 			await mutualTest( Buffer.allocUnsafe( 10 ) ) ;
@@ -752,24 +760,28 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ;
 		} ) ;
 
-		it( "constructed instances, test the Date object" , async () => {
+		it( "constructed instances, test a fake Date object" , async () => {
+			function FakeDate( ... args ) {
+				this.date = new Date( ... args ) ;
+			}
+			
 			var options = {
 				classMap: {
-					Date: {
-						prototype: Date.prototype ,
+					FakeDate: {
+						prototype: FakeDate.prototype ,
 						unserializer: function( arg ) {
-							return new Date( arg ) ;
+							return new FakeDate( arg ) ;
 						} ,
 						serializer: function( value ) {
-							return { args: [ value.getTime() ] } ;
+							return { args: [ value.date.getTime() ] } ;
 						}
 					}
 				}
 			} ;
 
-			await mutualTest( new Date() , options , options ) ;
-			await mutualTest( [ new Date() , new Date() , new Date() ] , options , options ) ;
-			await mutualTest( { a: new Date() , b: new Date() , c: new Date() } , options , options ) ;
+			await mutualTest( new FakeDate() , options , options ) ;
+			await mutualTest( [ new FakeDate() , new FakeDate() , new FakeDate() ] , options , options ) ;
+			await mutualTest( { a: new FakeDate() , b: new FakeDate() , c: new FakeDate() } , options , options ) ;
 		} ) ;
 		
 		it( "Serializer 'autoInstance' option" , async () => {
@@ -1103,7 +1115,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 
 
-/*
+//*
 it( "debug" , () => {
 	console.log( jsbindat.strSerialize( undefined ) ) ;
 	console.log( jsbindat.strSerialize( null ) ) ;
@@ -1115,7 +1127,6 @@ it( "debug" , () => {
 	console.log( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , p1: false , p2: null , p3: NaN } ) ) ;
 	console.log( JSON.stringify( { number: 1.25487 , name: "Bob!" , p1: false , p2: null , p3: NaN } ) ) ;
 	console.log( jsbindat.strSerialize( new Date() ) ) ;
-	console.log( jsbindat.strSerialize( new Date() , { classMap: jsbindat.builtIn } ) ) ;
 	console.log( JSON.stringify( new Date() ) ) ;
 	console.log( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , array:[ {},[],[1,2,3],{a:1,b:2},{c:1,d:{e:3},f:4} ] } ) ) ;
 	console.log( jsbindat.strSerialize( { buf: Buffer.from( 'Hello Bob!' ) } ) ) ;
@@ -1123,7 +1134,7 @@ it( "debug" , () => {
 	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( 1.25487 ) ) ) ;
 	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( "Hello Bob!" ) ) ) ;
 	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( [ 1.25487 , "Bob!" , false , null , NaN ] ) ) ) ;
-	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( new Date() , { classMap: jsbindat.builtIn } ) , { classMap: jsbindat.builtIn } ) ) ;
+	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( new Date() ) ) ) ;
 	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , p1: false , p2: null , p3: NaN } ) ) ) ;
 	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( { number: 1.25487 , name: "Bob!" , array:[ {},[],[1,2,3],{a:1,b:2},{c:1,d:{e:3},f:4} ] } ) ) ) ;
 	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( { buf: Buffer.from( 'Hello Bob!' ) } ) ) ) ;
