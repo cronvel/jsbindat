@@ -423,7 +423,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			}
 
 			ZeClass.serializer = function( obj ) {
-				return { overide: obj } ;
+				return { override: obj } ;
 			} ;
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
@@ -456,7 +456,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			}
 
 			ZeClass.serializer = function( obj ) {
-				return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
+				return { args: [ obj.arg1 , obj.arg2 ] , override: { a: obj.a , b: obj.b } } ;
 			} ;
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
@@ -491,7 +491,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
-						serializer: function( obj ) { return { overide: obj } ; } ,
+						serializer: function( obj ) { return { override: obj } ; } ,
 						unserializer: function() { return new ZeClass() ; }
 					}
 				}
@@ -509,7 +509,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ;
 		} ) ;
 
-		it( "constructed instances, using 'overideKeys' and 'overide'" , async () => {
+		it( "constructed instances, using 'overrideKeys' and 'override'" , async () => {
 			function ZeClass() {
 				this.a = 4 ;
 				this.b = 7 ;
@@ -521,7 +521,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
-						serializer: function( obj ) { return { overide: obj , overideKeys: [ 'a' , 'c' ] } ; } ,
+						serializer: function( obj ) { return { override: obj , overrideKeys: [ 'a' , 'c' ] } ; } ,
 						unserializer: function() { return new ZeClass() ; }
 					}
 				}
@@ -540,7 +540,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ) ;
 		} ) ;
 
-		it( "constructed instances, using 'overideKeys' without 'overide'" , async () => {
+		it( "constructed instances, using 'overrideKeys' without 'override'" , async () => {
 			function ZeClass() {
 				this.a = 4 ;
 				this.b = 7 ;
@@ -552,7 +552,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
-						serializer: function( obj ) { return { overideKeys: [ 'a' , 'c' ] } ; } ,
+						serializer: function( obj ) { return { overrideKeys: [ 'a' , 'c' ] } ; } ,
 						unserializer: function() { return new ZeClass() ; }
 					}
 				}
@@ -586,7 +586,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
 						serializer: function( obj ) {
-							return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
+							return { args: [ obj.arg1 , obj.arg2 ] , override: { a: obj.a , b: obj.b } } ;
 						} ,
 						unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 					}
@@ -619,7 +619,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 				ZeClass: {
 					prototype: ZeClass.prototype ,
 					serializer: function( obj ) {
-						return { args: [ obj.arg1 , obj.arg2 ] , overide: { a: obj.a , b: obj.b } } ;
+						return { args: [ obj.arg1 , obj.arg2 ] , override: { a: obj.a , b: obj.b } } ;
 					} ,
 					unserializer: function( ctx , arg1 , arg2 ) {
 						var object = new ZeClass( arg1 , arg2 ) ;
@@ -694,7 +694,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 					return {
 						className: className ,
 						args: [ obj.arg1 , obj.arg2 ] ,
-						overide: { a: obj.a , b: obj.b }
+						override: { a: obj.a , b: obj.b }
 					} ;
 				} ,
 				unserializer: function( ctx , className , arg1 , arg2 ) {
@@ -1081,7 +1081,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 							delete clone.arg1 ;
 							delete clone.arg2 ;
 
-							return { args: [ obj.arg1 , obj.arg2 ] , overide: clone } ;
+							return { args: [ obj.arg1 , obj.arg2 ] , override: clone } ;
 						} ,
 						unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; }
 					}
