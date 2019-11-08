@@ -31,8 +31,6 @@
 const fs = require( 'fs' ) ;
 const jsbindat = require( '..' ) ;
 const ClassMap = jsbindat.ClassMap ;
-//const expect = require( 'expect.js' ) ;
-const Promise = require( 'seventh' ) ;
 const string = require( 'string-kit' ) ;
 
 

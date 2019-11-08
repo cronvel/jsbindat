@@ -11,11 +11,10 @@
     "bench": "bench"
   },
   "dependencies": {
-    "seventh": "^0.7.23",
-    "stream-kit": "^0.2.7"
+    "stream-kit": "^0.2.8"
   },
   "devDependencies": {
-    "string-kit": "^0.9.9"
+    "string-kit": "^0.10.1"
   },
   "scripts": {
     "test": "tea-time -R dot"

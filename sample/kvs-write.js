@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
 	JS Binary Data
 
@@ -24,46 +25,20 @@
 	SOFTWARE.
 */
 
-"use strict" ;
+const fsPromise = require( 'fs' ).promises ;
+const jsbindat = require( '..' ) ;
+const KVStore = jsbindat.KVStore ;
 
 
 
-const fs = require( 'fs' ) ;
+async function run() {
+	var file = await fsPromise.open( './test.db' , 'w+' ) ;
+	console.log( file ) ;
+	
+	var store = new KVStore( file ) ;
+	
+	process.exit() ;
+}
 
-
-
-const jsbindat = {} ;
-module.exports = jsbindat ;
-
-
-
-jsbindat.ClassMap = require( './ClassMap.js' ) ;
-jsbindat.Unknown = require( './Unknown.js' ) ;
-jsbindat.KVStore = require( './KVStore.js' ) ;
-jsbindat.builtIn = require( './builtIn.js' ) ;
-jsbindat.serialize = require( './serialize.js' ) ;
-jsbindat.unserialize = require( './unserialize.js' ) ;
-
-jsbindat.strSerialize = require( './strSerialize.js' ) ;
-jsbindat.strUnserialize = require( './strUnserialize.js' ) ;
-
-
-
-jsbindat.writeFile = async function writeFile( filePath , data , options ) {
-	var stream = fs.createWriteStream( filePath ) ;
-
-	await jsbindat.serialize( stream , data , options ) ;
-	await stream.endAsync() ;	// created by StreamBuffer
-} ;
-
-
-
-jsbindat.readFile = async function readFile( filePath , options , context ) {
-	var stream = fs.createReadStream( filePath ) ;
-
-	var data = await jsbindat.unserialize( stream , options , context ) ;
-	await stream.close() ;
-
-	return data ;
-} ;
+run() ;
 
