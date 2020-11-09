@@ -338,22 +338,27 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ;
 		} ) ;
 
-		it( "Functions in structure should be set to undefined" , async () => {
+		it( "Functions should be serialized/unserialized only if 'enableFunction' is set (default to false)" , async () => {
 			var data = {
 				a: 1 ,
-				fn: function() {} ,
+				fn: function( a , b ) { return a + b ; } ,
+				arrowFn: ( a , b ) => a - b ,
 				b: 2
 			} ;
 
 			var unserializedData = await serializeUnserialize( data ) ;
 			
-			expect( unserializedData ).to.equal( {
-				a: 1 ,
-				b: 2
-			} ) ;
-			
+			expect( unserializedData.a ).to.be( 1 ) ;
+			expect( unserializedData.b ).to.be( 2 ) ;
 			expect( unserializedData.fn ).to.be.undefined() ;
-			expect( unserializedData ).to.have.property( 'fn' ) ;
+			expect( unserializedData.arrowFn ).to.be.undefined() ;
+
+			var unserializedData = await serializeUnserialize( data , { enableFunction: true } ) ;
+			
+			expect( unserializedData.a ).to.be( 1 ) ;
+			expect( unserializedData.b ).to.be( 2 ) ;
+			expect( unserializedData.fn( 7 , 4 ) ).to.be( 11 ) ;
+			expect( unserializedData.arrowFn( 7 , 4 ) ).to.be( 3 ) ;
 		} ) ;
 		
 		it( "real-world test" , async () => {

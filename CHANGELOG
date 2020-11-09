@@ -1,4 +1,10 @@
 
+v0.10.1
+-------
+
+Support for function (opt-in, because it can be a security hole when unserializing from an untrusted source)
+
+
 v0.10.0
 -------
 
