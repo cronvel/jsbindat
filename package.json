@@ -1,6 +1,6 @@
 {
   "name": "jsbindat",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Binary data serializer and unserializer for Node.js.",
   "main": "lib/jsbindat.js",
   "engines": {
@@ -46,7 +46,7 @@
     "title": "JS Binary Data",
     "years": [
       2016,
-      2019
+      2021
     ],
     "owner": "Cédric Ronvel"
   }

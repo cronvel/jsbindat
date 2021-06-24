@@ -1,4 +1,10 @@
 
+v0.10.2
+-------
+
+StreamBuffer: compute bytelength in writeUtf8() (it was an internal function that is now promoted as API)
+
+
 v0.10.1
 -------
 
