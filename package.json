@@ -1,6 +1,6 @@
 {
   "name": "jsbindat",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "Binary data serializer and unserializer for Node.js.",
   "main": "lib/jsbindat.js",
   "engines": {
@@ -11,7 +11,7 @@
     "bench": "bench"
   },
   "dependencies": {
-    "stream-kit": "^0.2.8"
+    "stream-kit": "^0.4.14"
   },
   "devDependencies": {
     "string-kit": "^0.10.1"
