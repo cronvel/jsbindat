@@ -220,6 +220,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			await mutualTest( 'a'.repeat( 128 ) ) ;
 			await mutualTest( 'a'.repeat( 256 ) ) ;
 			await mutualTest( 'a'.repeat( 512 ) ) ;
+			await mutualTest( 'this is a really really really big big big string!'.repeat( 10 ) ) ;
 			await mutualTest( 'this is a really really really big big big string!'.repeat( 100 ) ) ;
 			await mutualTest( 'this is a really really really big big big string!'.repeat( 2000 ) ) ;
 			await mutualTest( 'this is a really really really big big big string!'.repeat( 200000 ) ) ;
