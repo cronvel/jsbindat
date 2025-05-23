@@ -1,4 +1,10 @@
 
+v0.11.2
+-------
+
+Stream-kit dependencies, and .serialize() now support an initial buffer to be prepended to the serialization
+
+
 v0.11.1
 -------
 
