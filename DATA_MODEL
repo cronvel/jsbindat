@@ -1,0 +1,61 @@
+
+Data Model
+
+
+
+Data models are pre-configured models producing shorter binary data.
+
+E.g. instead of transmitting:
+
+{ fistName: "Bob" , lastName: "Wallace" , age: 45 }
+
+We only would transmit the strings "Bob" and "Wallace" and the integer 45, and using the correct data model
+the unserializer would be able to reconstruct the whole object.
+
+An imperative-like approach for data-model could be :
+
+
+
+[
+	lps16_array ,  // immediately read a uint16 and create an array, then for each element:
+	[
+		object ,	// create an object
+		[
+			"firstName" , lps8_string ,	// create a property "firstName" and read an lps8_string
+			"lastName" , lps8_string ,	// create a property "lastName" and read an lps8_string
+			"age" , uint8 ,				// create a property "age" and read an uint8
+		] ,	// close the object
+	] ,	// close the array
+]
+
+
+
+Object-variant allowing a single property to be user-defined :
+
+
+
+[
+	object ,	// create an object
+	[
+		"firstName" , lps8_string ,	// create a property "firstName" and read an lps8_string
+		"lastName" , lps8_string ,	// create a property "lastName" and read an lps8_string
+		"age" , uint8 ,				// create a property "age" and read an uint8
+		lps8_string , lps8_string	// also this would read a lps8_string to create a property based on it, then read an lps8_string as value
+	] ,	// close the object
+]
+
+
+
+More verbose syntax:
+
+model = dtype.Array( dtype.uint16 ,
+	dtype.Object( [
+		"firstName" , dtype.lps8_string ,
+		"lastName" , dtype.lps8_string ,
+		"age" , dtype.uint8
+	] )
+) ;
+
+If the array have a fixed length, e.g. 16, the constant value would be set here:
+model = dtype.Array( 16 , ... )
+
