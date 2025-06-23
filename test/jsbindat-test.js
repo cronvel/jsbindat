@@ -31,6 +31,7 @@
 const fs = require( 'fs' ) ;
 const jsbindat = require( '..' ) ;
 const ClassMap = jsbindat.ClassMap ;
+const DataModel = jsbindat.DataModel ;
 const string = require( 'string-kit' ) ;
 
 
@@ -1115,7 +1116,27 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ;
 		} ) ;
 	} ) ;
+
+
+
+	describe( "Data model - improve space-efficiency when serializing known and typed data" , () => {
+		it( "yyy" , () => {
+			var model = new DataModel( null , [
+				
+			] ) ;
+		} ) ;
+	} ) ;
 }
+
+
+
+describe( "Data model - improve space-efficiency when serializing known and typed data" , () => {
+	it( "zzz" , () => {
+		var model = new DataModel( null , [
+			
+		] ) ;
+	} ) ;
+} ) ;
 
 
 
@@ -1144,3 +1165,4 @@ it( "debug" , () => {
 	console.log( jsbindat.strUnserialize( jsbindat.strSerialize( { buf: Buffer.from( 'Hello Bob!' ) } ) ) ) ;
 } ) ;
 //*/
+
