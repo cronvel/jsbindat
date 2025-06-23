@@ -58,7 +58,7 @@ function deb( title , v ) {
 
 async function serializeUnserializeParam( param , originalData , serializerOptions , unserializerOptions , context ) {
 	if ( unserializerOptions === undefined && serializerOptions ) { unserializerOptions = serializerOptions ; }
-	
+
 	if ( param.binaryMode ) {
 		await jsbindat.writeFile( __dirname + '/out.jsdat' , originalData , serializerOptions ) ;
 		//console.log( 'before' ) ;
@@ -72,7 +72,7 @@ async function serializeUnserializeParam( param , originalData , serializerOptio
 		var data = jsbindat.strUnserialize( str , unserializerOptions , context ) ;
 		//console.log( 'after' ) ;
 	}
-	
+
 	return data ;
 } ;
 
@@ -132,24 +132,6 @@ async function mutualTestParam( param , originalData , serializerOptions , unser
 
 
 /* Tests */
-
-
-
-describe( "Binary serializer/unserializer" , () => {
-	reusableTests(
-		( ... args ) => serializeUnserializeParam( { binaryMode: true } , ... args ) ,
-		( ... args ) => mutualTestParam( { binaryMode: true } , ... args )
-	) ;
-} ) ;
-
-
-
-describe( "String serializer/unserializer" , () => {
-	reusableTests(
-		( ... args ) => serializeUnserializeParam( { binaryMode: false } , ... args ) ,
-		( ... args ) => mutualTestParam( { binaryMode: false } , ... args )
-	) ;
-} ) ;
 
 
 
@@ -1116,25 +1098,37 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ;
 		} ) ;
 	} ) ;
-
-
-
-	describe( "Data model - improve space-efficiency when serializing known and typed data" , () => {
-		it( "yyy" , () => {
-			var model = new DataModel( null , [
-				
-			] ) ;
-		} ) ;
-	} ) ;
 }
 
 
 
-describe( "Data model - improve space-efficiency when serializing known and typed data" , () => {
-	it( "zzz" , () => {
-		var model = new DataModel( null , [
-			
-		] ) ;
+describe( "String serializer/unserializer" , () => {
+	reusableTests(
+		( ... args ) => serializeUnserializeParam( { binaryMode: false } , ... args ) ,
+		( ... args ) => mutualTestParam( { binaryMode: false } , ... args )
+	) ;
+} ) ;
+
+
+
+describe( "Binary serializer/unserializer" , () => {
+	var serializeUnserialize = ( ... args ) => serializeUnserializeParam( { binaryMode: true } , ... args ) ;
+	var mutualTest = ( ... args ) => mutualTestParam( { binaryMode: true } , ... args ) ;
+
+	reusableTests( serializeUnserialize , mutualTest ) ;
+
+
+
+	// Tests that are only supported by Binary serializer/unserializer
+
+	describe( "Data model - improve space-efficiency when serializing known and typed data" , () => {
+		it( "zzz" , async () => {
+			var model = new DataModel.TypedArray( null , 'uint32' ) ;
+			var data = [ 14 , 1 , 487 , 742 ] ;
+			var params = { model } ;
+			var output = await serializeUnserialize( data , params , params ) ;
+			console.log( "output:" , output ) ;
+		} ) ;
 	} ) ;
 } ) ;
 
