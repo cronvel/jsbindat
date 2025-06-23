@@ -359,7 +359,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: new ClassMap( {
 					ZeClass: ZeClass
 				} )
@@ -371,7 +371,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			//console.log( 'data: ' , data ) ;
 
-			await mutualTest( data , options , options , udata => {
+			await mutualTest( data , params , params , udata => {
 				//console.log( 'udata: ' , udata ) ;
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
@@ -385,7 +385,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: ZeClass
 				}
@@ -397,7 +397,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			//console.log( 'data: ' , data ) ;
 
-			await mutualTest( data , options , options , udata => {
+			await mutualTest( data , params , params , udata => {
 				//console.log( 'udata: ' , udata ) ;
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
@@ -415,7 +415,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: ZeClass
 				}
@@ -428,7 +428,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			data.v2.inc() ;
 
-			await mutualTest( data , options , options , udata => {
+			await mutualTest( data , params , params , udata => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 				expect( Object.getPrototypeOf( udata.v2 ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
@@ -448,7 +448,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: ZeClass
 				}
@@ -461,7 +461,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			data.v2.inc() ;
 
-			await mutualTest( data , options , options , ( udata ) => {
+			await mutualTest( data , params , params , ( udata ) => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
 		} ) ;
@@ -474,7 +474,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
@@ -491,7 +491,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			data.v2.inc() ;
 
-			await mutualTest( data , options , options , ( udata ) => {
+			await mutualTest( data , params , params , ( udata ) => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
 		} ) ;
@@ -504,7 +504,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
@@ -518,7 +518,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			data.a = 12 ;
 			data.b = 18 ;
 
-			var unserializedData = await serializeUnserialize( data , options ) ;
+			var unserializedData = await serializeUnserialize( data , params ) ;
 			//deb( "unserializedData:" , unserializedData ) ;
 			
 			expect( unserializedData ).to.equal( Object.assign( new ZeClass() , {
@@ -535,7 +535,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
@@ -549,7 +549,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			data.a = 12 ;
 			data.b = 18 ;
 
-			var unserializedData = await serializeUnserialize( data , options ) ;
+			var unserializedData = await serializeUnserialize( data , params ) ;
 			//deb( "unserializedData:" , unserializedData ) ;
 			
 			expect( unserializedData ).to.equal( Object.assign( new ZeClass() , {
@@ -568,7 +568,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
@@ -587,7 +587,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			data.v2.inc() ;
 
-			await mutualTest( data , options , options , ( udata ) => {
+			await mutualTest( data , params , params , ( udata ) => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
 		} ) ;
@@ -752,7 +752,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 				this.date = new Date( ... args ) ;
 			}
 			
-			var options = {
+			var params = {
 				classMap: {
 					FakeDate: {
 						prototype: FakeDate.prototype ,
@@ -766,9 +766,9 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 				}
 			} ;
 
-			await mutualTest( new FakeDate() , options , options ) ;
-			await mutualTest( [ new FakeDate() , new FakeDate() , new FakeDate() ] , options , options ) ;
-			await mutualTest( { a: new FakeDate() , b: new FakeDate() , c: new FakeDate() } , options , options ) ;
+			await mutualTest( new FakeDate() , params , params ) ;
+			await mutualTest( [ new FakeDate() , new FakeDate() , new FakeDate() ] , params , params ) ;
+			await mutualTest( { a: new FakeDate() , b: new FakeDate() , c: new FakeDate() } , params , params ) ;
 		} ) ;
 		
 		it( "Serializer 'autoInstance' option" , async () => {
@@ -1020,7 +1020,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: ZeClass
 				}
@@ -1038,7 +1038,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			data.v2.v = data.v ;
 			data.v3 = data.v2 ;
 
-			await mutualTest( data , options , options , ( udata ) => {
+			await mutualTest( data , params , params , ( udata ) => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 				expect( Object.getPrototypeOf( udata.v2 ) ).to.be( ZeClass.prototype ) ;
 				expect( udata.v.root ).to.be( udata ) ;
@@ -1057,7 +1057,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 
 			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
 
-			var options = {
+			var params = {
 				classMap: {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
@@ -1087,7 +1087,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			data.v2.v = data.v ;
 			data.v3 = data.v2 ;
 
-			await mutualTest( data , options , options , ( udata ) => {
+			await mutualTest( data , params , params , ( udata ) => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 				expect( Object.getPrototypeOf( udata.v2 ) ).to.be( ZeClass.prototype ) ;
 				expect( udata.v.root ).to.be( udata ) ;
@@ -1117,17 +1117,106 @@ describe( "Binary serializer/unserializer" , () => {
 
 	reusableTests( serializeUnserialize , mutualTest ) ;
 
-
-
 	// Tests that are only supported by Binary serializer/unserializer
 
 	describe( "Data model - improve space-efficiency when serializing known and typed data" , () => {
-		it( "zzz" , async () => {
-			var model = new DataModel.TypedArray( null , 'uint32' ) ;
-			var data = [ 14 , 1 , 487 , 742 ] ;
-			var params = { model } ;
+
+		it( "TypedArray model" , async () => {
+			var data , model , params ;
+
+			model = new DataModel.TypedArray( null , 'uint32' ) ;
+			params = { model } ;
+
+			data = [] ;
+			await mutualTest( data , params , params ) ;
+
+			data = [ 14 , 1 , 487 , 742 ] ;
+			await mutualTest( data , params , params ) ;
+
+			model = new DataModel.TypedArray( null , 'uint8' ) ;
+			params = { model } ;
+			data = [ 21 , 0 , 4 , 7 , 78 ] ;
+			await mutualTest( data , params , params ) ;
+		} ) ;
+
+		it( "FixedTypedArray model" , async () => {
+			var data , model , params ;
+
+			model = new DataModel.FixedTypedArray( null , 'uint8' , 5 ) ;
+			params = { model } ;
+
+			data = [ 21 , 0 , 4 , 7 , 78 ] ;
+			await mutualTest( data , params , params ) ;
+
+			data = [] ;
 			var output = await serializeUnserialize( data , params , params ) ;
-			console.log( "output:" , output ) ;
+			expect( output ).to.equal( [ 0 , 0 , 0 , 0 , 0 ] ) ;
+
+			data = [ 21 , 0 , 4 , 7 , 78 , 33 , 75 ] ;
+			output = await serializeUnserialize( data , params , params ) ;
+			expect( output ).to.equal( [ 21 , 0 , 4 , 7 , 78 ] ) ;
+		} ) ;
+
+		it( "SealedObject model" , async () => {
+			var data , model , params ;
+
+			model = new DataModel.SealedObject( null , [
+				[ 'x' , 'number' ] ,
+				[ 'y' , 'number' ] ,
+				[ 'z' , 'number' ] ,
+				[ 'vx' , 'number' ] ,
+				[ 'vy' , 'number' ] ,
+				[ 'vz' , 'number' ]
+			] ) ;
+			params = { model } ;
+
+			data = { x: 3.12 , y: 7.47 , z: -4.21 , vx: 0.125 , vy: -0.125 , vz: 0 } ;
+			await mutualTest( data , params , params ) ;
+
+			model = new DataModel.SealedObject( null , [
+				[ 'x' , 'float32' ] ,
+				[ 'y' , 'float32' ] ,
+				[ 'z' , 'float32' ] ,
+				[ 'vx' , 'float32' ] ,
+				[ 'vy' , 'float32' ] ,
+				[ 'vz' , 'float32' ]
+			] ) ;
+			params = { model } ;
+
+			data = { x: 3 , y: 7 , z: -4 , vx: 0.125 , vy: -0.125 , vz: 0 } ;
+			await mutualTest( data , params , params ) ;
+
+			model = new DataModel.SealedObject( null , [
+				[ 'firstName' , 'lps8string' ] ,
+				[ 'lastName' , 'lps8string' ] ,
+				[ 'age' , 'uint8' ]
+			] ) ;
+			params = { model } ;
+
+			data = { firstName: "Bobby" , lastName: "Wallace" , age: 54 } ;
+			await mutualTest( data , params , params ) ;
+		} ) ;
+
+		it( "Nested SealedObject model" , async () => {
+			var data , params ;
+
+			var vector3dModel = new DataModel.SealedObject( null , [
+				[ 'x' , 'float32' ] ,
+				[ 'y' , 'float32' ] ,
+				[ 'z' , 'float32' ]
+			] ) ;
+
+			var entityModel = new DataModel.SealedObject( null , [
+				[ 'name' , 'lps8string' ] ,
+				[ 'position' , vector3dModel ] ,
+				[ 'speed' , vector3dModel ]
+			] ) ;
+
+			params = { model: entityModel } ;
+
+			data = { name: "Bobby" , position: { x: 3 , y: 7 , z: -4 } , speed: { x: 0.125 , y: -0.125 , z: 0 } } ;
+			await mutualTest( data , params , params ) ;
+			//var out = await serializeUnserialize( data , params , params ) ; console.log( "out:" , out ) ;
 		} ) ;
 	} ) ;
 } ) ;
