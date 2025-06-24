@@ -1,4 +1,10 @@
 
+v0.11.4
+-------
+
+New: support for Data Model, for space-efficient serialization (very good for network transmissions)
+
+
 v0.11.3
 -------
 
