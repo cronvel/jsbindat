@@ -1137,6 +1137,11 @@ describe( "Binary serializer/unserializer" , () => {
 			params = { model } ;
 			data = [ 21 , 0 , 4 , 7 , 78 ] ;
 			await mutualTest( data , params , params ) ;
+
+			model = new DataModel.TypedArray( null , 'lps8string' ) ;
+			params = { model } ;
+			data = [ "Hello my friend" , "stay awhile and listen" ] ;
+			await mutualTest( data , params , params ) ;
 		} ) ;
 
 		it( "FixedTypedArray model" , async () => {
@@ -1155,6 +1160,11 @@ describe( "Binary serializer/unserializer" , () => {
 			data = [ 21 , 0 , 4 , 7 , 78 , 33 , 75 ] ;
 			output = await serializeUnserialize( data , params , params ) ;
 			expect( output ).to.equal( [ 21 , 0 , 4 , 7 , 78 ] ) ;
+
+			model = new DataModel.FixedTypedArray( null , 'lps8string' , 2 ) ;
+			params = { model } ;
+			data = [ "Hello my friend" , "stay awhile and listen" ] ;
+			await mutualTest( data , params , params ) ;
 		} ) ;
 
 		it( "SealedObject model" , async () => {
@@ -1189,15 +1199,19 @@ describe( "Binary serializer/unserializer" , () => {
 			model = new DataModel.SealedObject( null , [
 				[ 'firstName' , 'lps8string' ] ,
 				[ 'lastName' , 'lps8string' ] ,
-				[ 'age' , 'uint8' ]
+				[ 'age' , 'uint8' ] ,
+				// IMPORTANT: Pack booleans, they will use only 1 bit instead of 1 byte
+				[ 'alive' , 'boolean' ] ,
+				[ 'bleeding' , 'boolean' ] ,
+				[ 'poisoned' , 'boolean' ]
 			] ) ;
 			params = { model } ;
 
-			data = { firstName: "Bobby" , lastName: "Wallace" , age: 54 } ;
+			data = { firstName: "Bobby" , lastName: "Wallace" , age: 54 , alive: true , bleeding: false , poisoned: false } ;
 			await mutualTest( data , params , params ) ;
 		} ) ;
 
-		it( "Nested SealedObject model" , async () => {
+		it( "Nested DataModels inside a SealedObject model" , async () => {
 			var data , params ;
 
 			var vector3dModel = new DataModel.SealedObject( null , [
@@ -1206,17 +1220,65 @@ describe( "Binary serializer/unserializer" , () => {
 				[ 'z' , 'float32' ]
 			] ) ;
 
+			var inventoryModel = new DataModel.TypedArray( null , 'lps8string' ) ;
+
 			var entityModel = new DataModel.SealedObject( null , [
 				[ 'name' , 'lps8string' ] ,
 				[ 'position' , vector3dModel ] ,
-				[ 'speed' , vector3dModel ]
+				[ 'speed' , vector3dModel ] ,
+				[ 'inventory' , inventoryModel ]
 			] ) ;
 
 			params = { model: entityModel } ;
 
-			data = { name: "Bobby" , position: { x: 3 , y: 7 , z: -4 } , speed: { x: 0.125 , y: -0.125 , z: 0 } } ;
+			data = { name: "Bobby" , position: { x: 3 , y: 7 , z: -4 } , speed: { x: 0.125 , y: -0.125 , z: 0 } , inventory: [ 'sword' , 'boots' ] } ;
 			await mutualTest( data , params , params ) ;
 			//var out = await serializeUnserialize( data , params , params ) ; console.log( "out:" , out ) ;
+		} ) ;
+
+		it( "Nested DataModels inside a TypedArray model" , async () => {
+			var data , params ;
+
+			var itemModel = new DataModel.SealedObject( null , [
+				[ 'id' , 'lps8string' ] ,
+				[ 'quantity' , 'uint8' ]
+			] ) ;
+
+			var inventoryModel = new DataModel.TypedArray( null , itemModel ) ;
+
+			params = { model: inventoryModel } ;
+
+			data = [ { id: 'apple' , quantity: 3 } , { id: 'healingPotion' , quantity: 2 } ] ;
+			await mutualTest( data , params , params ) ;
+			//var out = await serializeUnserialize( data , params , params ) ; console.log( "out:" , out ) ;
+
+			var vector3dModel = new DataModel.FixedTypedArray( null , 'float32' , 3 ) ;
+			var dotsModel = new DataModel.TypedArray( null , vector3dModel ) ;
+
+			params = { model: dotsModel } ;
+			data = [ [ 1 , 2 , 5 ] , [ -4 , 7 , -1 ] ] ;
+			await mutualTest( data , params , params ) ;
+		} ) ;
+
+		it( "Support for 'any' (dynamic) data inside a model" , async () => {
+			var data , model , params ;
+
+			await mutualTest( data , params , params ) ;
+
+			model = new DataModel.SealedObject( null , [
+				[ 'name' , 'lps8string' ] ,
+				[ 'data' , 'any' ] ,
+			] ) ;
+			params = { model } ;
+
+			data = { name: "Bobby" , data: null } ;
+			await mutualTest( data , params , params ) ;
+
+			data = { name: "Bobby" , data: true } ;
+			await mutualTest( data , params , params ) ;
+
+			data = { name: "Bobby" , data: { some: "data" , more: "data..." } } ;
+			await mutualTest( data , params , params ) ;
 		} ) ;
 	} ) ;
 } ) ;
