@@ -121,7 +121,7 @@ async function mutualTestParam( param , originalData , serializerOptions , unser
 		//deb( "Input data" , originalData ) ;
 		//deb( "Output data" , data ) ;
 		throw error ;
-		return ;
+		//return ;
 	}
 
 	if ( typeof extraTestCb === 'function' ) { extraTestCb( data ) ; }
@@ -1287,7 +1287,7 @@ describe( "Binary serializer/unserializer" , () => {
 				this.secondProperty = 7 ;
 			}
 
-			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+			ZeClass.prototype.inc = function() { this.firstProperty ++ ; this.secondProperty ++ ; } ;
 
 			var ZeClassModel = new DataModel.SealedObject( null , [
 				[ 'firstProperty' , 'uint16' ] ,
@@ -1313,6 +1313,10 @@ describe( "Binary serializer/unserializer" , () => {
 			await mutualTest( data , params , params , ( udata ) => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 37 ) ;	// instead of 101 without data model
 		} ) ;
 
 		it( "yyy Support instances with constructor serialization using a model" , async () => {
@@ -1321,7 +1325,7 @@ describe( "Binary serializer/unserializer" , () => {
 				this.secondProperty = 7 ;
 			}
 
-			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+			ZeClass.prototype.inc = function() { this.firstProperty ++ ; this.secondProperty ++ ; } ;
 
 			var ZeClassModel = new DataModel.SealedObject( null , [
 				[ 'firstProperty' , 'uint16' ] ,
@@ -1350,6 +1354,57 @@ describe( "Binary serializer/unserializer" , () => {
 			await mutualTest( data , params , params , ( udata ) => {
 				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
 			} ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 39 ) ;	// instead of 103 without data model
+		} ) ;
+
+		it( "www Support instances with constructor with arguments serialization using a model" , async () => {
+			function ZeClass( arg1 , arg2 ) {
+				this.arg1 = arg1 ;
+				this.arg2 = arg2 ;
+				this.firstProperty = 4 ;
+				this.secondProperty = 7 ;
+			}
+
+			ZeClass.prototype.inc = function() { this.firstProperty ++ ; this.secondProperty ++ ; } ;
+
+			var ZeClassArgumentsModel = new DataModel.FixedTypedArray( null , 'uint16' , 2 ) ;
+
+			var ZeClassOverrideModel = new DataModel.SealedObject( null , [
+				[ 'firstProperty' , 'uint16' ] ,
+				[ 'secondProperty' , 'uint16' ] ,
+			] ) ;
+
+			var params = {
+				classMap: {
+					ZeClass: {
+						prototype: ZeClass.prototype ,
+						serializer: function( obj ) {
+							return { args: [ obj.arg1 , obj.arg2 ] , override: { a: obj.a , b: obj.b } } ;
+						} ,
+						unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; } ,
+						argumentsModel: ZeClassArgumentsModel ,
+						overrideModel: ZeClassOverrideModel
+					}
+				}
+			} ;
+
+			var data = {
+				v: new ZeClass() ,
+				v2: new ZeClass()
+			} ;
+
+			data.v2.inc() ;
+
+			await mutualTest( data , params , params , ( udata ) => {
+				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			} ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 39 ) ;	// instead of 103 without data model
 		} ) ;
 	} ) ;
 } ) ;
