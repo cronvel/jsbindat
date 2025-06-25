@@ -1281,7 +1281,41 @@ describe( "Binary serializer/unserializer" , () => {
 			await mutualTest( data , params , params ) ;
 		} ) ;
 
-		it( "zzz Support instances serialization using a model" , async () => {
+		it( "zzz Support constructorless instances serialization using a model" , async () => {
+			function ZeClass() {
+				this.firstProperty = 4 ;
+				this.secondProperty = 7 ;
+			}
+
+			ZeClass.prototype.inc = function() { this.a ++ ; this.b ++ ; } ;
+
+			var ZeClassModel = new DataModel.SealedObject( null , [
+				[ 'firstProperty' , 'uint16' ] ,
+				[ 'secondProperty' , 'uint16' ] ,
+			] ) ;
+
+			var params = {
+				classMap: {
+					ZeClass: {
+						prototype: ZeClass.prototype ,
+						model: ZeClassModel
+					}
+				}
+			} ;
+
+			var data = {
+				v: new ZeClass() ,
+				v2: new ZeClass()
+			} ;
+
+			data.v2.inc() ;
+
+			await mutualTest( data , params , params , ( udata ) => {
+				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			} ) ;
+		} ) ;
+
+		it( "yyy Support instances with constructor serialization using a model" , async () => {
 			function ZeClass() {
 				this.firstProperty = 4 ;
 				this.secondProperty = 7 ;
@@ -1300,7 +1334,8 @@ describe( "Binary serializer/unserializer" , () => {
 						prototype: ZeClass.prototype ,
 						serializer: function( obj ) { return { override: obj } ; } ,
 						unserializer: function() { return new ZeClass() ; } ,
-						serializerModel: ZeClassModel
+						argumentsModel: null ,
+						overrideModel: ZeClassModel
 					}
 				}
 			} ;
