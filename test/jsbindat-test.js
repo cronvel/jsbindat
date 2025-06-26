@@ -1449,9 +1449,9 @@ describe( "Binary serializer/unserializer" , () => {
 
 
 
-	describe( "Optional string store to re-use them (opt-in, improve space-efficiency)" , () => {
+	describe( "Optional string store to reference them (opt-in, improve space-efficiency)" , () => {
 
-		it( "should re-use object's keys" , async () => {
+		it( "using the 'referenceStringKeys' options, it should store and reference object's keys" , async () => {
 			var data = [
 				{
 					firstName: "Bobby" ,
@@ -1478,18 +1478,55 @@ describe( "Binary serializer/unserializer" , () => {
 			//console.log( "File size:" , fileData.length ) ;
 			expect( fileData.length ).to.be( 141 ) ;
 
-			params = {
-				referenceStringKeys: true
-			} ;
+			params = { referenceStringKeys: true } ;
 
 			await mutualTest( data , params , params ) ;
 
 			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
 			//console.log( "File size:" , fileData.length ) ;
-			expect( fileData.length ).to.be( 107 ) ;	// instead of 141 without data model
+			expect( fileData.length ).to.be( 107 ) ;	// instead of 141 without string references
 		} ) ;
 
-		it( "TODO: re-use any strings" ) ;
+		it( "using the 'referenceStrings' options, it should store and reference all strings (keys and string values)" , async () => {
+			var data = [
+				{
+					firstName: "Bobby" ,
+					lastName: "Wallace" ,
+					age: 37
+				} ,
+				{
+					firstName: "Bobby" ,
+					lastName: "Armstrong" ,
+					age: 41
+				} ,
+				{
+					firstName: "Alice" ,
+					lastName: "Martin" ,
+					age: 34
+				} ,
+				{
+					firstName: "Marsellus" ,
+					lastName: "Wallace" ,
+					age: 45
+				}
+			] ;
+
+			var params = {} ;
+
+			await mutualTest( data , params , params ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 191 ) ;
+
+			params = { referenceStrings: true } ;
+
+			await mutualTest( data , params , params ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 130 ) ;	// instead of 191 without string references
+		} ) ;
 	} ) ;
 } ) ;
 
