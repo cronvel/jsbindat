@@ -1,4 +1,10 @@
 
+v0.11.5
+-------
+
+Data Model can now be used with instance serialization
+
+
 v0.11.4
 -------
 

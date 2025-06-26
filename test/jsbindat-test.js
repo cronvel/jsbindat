@@ -1012,7 +1012,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ;
 		} ) ;
 
-		it( "instances without constructor self referencing itself and other instances" , async () => {
+		it( "instances without constructor self-referencing itself and other instances" , async () => {
 			function ZeClass() {
 				this.a = 4 ;
 				this.b = 7 ;
@@ -1049,7 +1049,7 @@ function reusableTests( serializeUnserialize , mutualTest ) {
 			} ) ;
 		} ) ;
 
-		it( "instances with constructor self referencing itself and other instances" , async () => {
+		it( "instances with constructor self-referencing itself and other instances" , async () => {
 			function ZeClass() {
 				this.a = 4 ;
 				this.b = 7 ;
@@ -1281,7 +1281,7 @@ describe( "Binary serializer/unserializer" , () => {
 			await mutualTest( data , params , params ) ;
 		} ) ;
 
-		it( "Support constructorless instances serialization using a model" , async () => {
+		it( "Support serialization of constructorless instances using a model" , async () => {
 			function ZeClass() {
 				this.firstProperty = 4 ;
 				this.secondProperty = 7 ;
@@ -1319,7 +1319,7 @@ describe( "Binary serializer/unserializer" , () => {
 			expect( fileData.length ).to.be( 37 ) ;	// instead of 101 without data model
 		} ) ;
 
-		it( "Support instances with constructor serialization using a model" , async () => {
+		it( "Support serialization of instances with constructor using a model" , async () => {
 			function ZeClass() {
 				this.firstProperty = 4 ;
 				this.secondProperty = 7 ;
@@ -1360,7 +1360,7 @@ describe( "Binary serializer/unserializer" , () => {
 			expect( fileData.length ).to.be( 39 ) ;	// instead of 103 without data model
 		} ) ;
 
-		it( "Support instances with constructor with arguments serialization using a model" , async () => {
+		it( "Support serialization of instances with constructor with arguments using a model" , async () => {
 			function ZeClass( arg1 , arg2 ) {
 				this.arg1 = arg1 ;
 				this.arg2 = arg2 ;
@@ -1405,6 +1405,45 @@ describe( "Binary serializer/unserializer" , () => {
 			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
 			//console.log( "File size:" , fileData.length ) ;
 			expect( fileData.length ).to.be( 45 ) ;	// instead of 113 without data model
+		} ) ;
+
+		it( "Support serialization of instances with constructor with arguments and no override using a model" , async () => {
+			function ZeClass( arg1 , arg2 ) {
+				this.arg1 = arg1 ;
+				this.arg2 = arg2 ;
+			}
+
+			ZeClass.prototype.inc = function() { this.arg1 ++ ; this.arg2 ++ ; } ;
+
+			var ZeClassArgumentsModel = new DataModel.FixedTypedArray( 'uint16' , 2 ) ;
+
+			var params = {
+				classMap: {
+					ZeClass: {
+						prototype: ZeClass.prototype ,
+						serializer: function( obj ) {
+							return { args: [ obj.arg1 , obj.arg2 ] } ;
+						} ,
+						unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; } ,
+						argumentsModel: ZeClassArgumentsModel
+					}
+				}
+			} ;
+
+			var data = {
+				v: new ZeClass( 15 , 13 ) ,
+				v2: new ZeClass( 10 , 11 )
+			} ;
+
+			data.v2.inc() ;
+
+			await mutualTest( data , params , params , ( udata ) => {
+				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			} ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 39 ) ;	// instead of 43 without data model
 		} ) ;
 	} ) ;
 } ) ;
