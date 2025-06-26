@@ -1446,6 +1446,51 @@ describe( "Binary serializer/unserializer" , () => {
 			expect( fileData.length ).to.be( 39 ) ;	// instead of 43 without data model
 		} ) ;
 	} ) ;
+
+
+
+	describe( "Optional string store to re-use them (opt-in, improve space-efficiency)" , () => {
+
+		it( "should re-use object's keys" , async () => {
+			var data = [
+				{
+					firstName: "Bobby" ,
+					lastName: "Wallace" ,
+					age: 37
+				} ,
+				{
+					firstName: "Jacky" ,
+					lastName: "Armstrong" ,
+					age: 41
+				} ,
+				{
+					firstName: "Alice" ,
+					lastName: "Martin" ,
+					age: 34
+				}
+			] ;
+
+			var params = {} ;
+
+			await mutualTest( data , params , params ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 141 ) ;
+
+			params = {
+				referenceStringKeys: true
+			} ;
+
+			await mutualTest( data , params , params ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 107 ) ;	// instead of 141 without data model
+		} ) ;
+
+		it( "TODO: re-use any strings" ) ;
+	} ) ;
 } ) ;
 
 
