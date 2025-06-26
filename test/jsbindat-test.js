@@ -1124,7 +1124,7 @@ describe( "Binary serializer/unserializer" , () => {
 		it( "TypedArray model" , async () => {
 			var data , model , params ;
 
-			model = new DataModel.TypedArray( null , 'uint32' ) ;
+			model = new DataModel.TypedArray( 'uint32' ) ;
 			params = { model } ;
 
 			data = [] ;
@@ -1133,12 +1133,12 @@ describe( "Binary serializer/unserializer" , () => {
 			data = [ 14 , 1 , 487 , 742 ] ;
 			await mutualTest( data , params , params ) ;
 
-			model = new DataModel.TypedArray( null , 'uint8' ) ;
+			model = new DataModel.TypedArray( 'uint8' ) ;
 			params = { model } ;
 			data = [ 21 , 0 , 4 , 7 , 78 ] ;
 			await mutualTest( data , params , params ) ;
 
-			model = new DataModel.TypedArray( null , 'lps8string' ) ;
+			model = new DataModel.TypedArray( 'lps8string' ) ;
 			params = { model } ;
 			data = [ "Hello my friend" , "stay awhile and listen" ] ;
 			await mutualTest( data , params , params ) ;
@@ -1147,7 +1147,7 @@ describe( "Binary serializer/unserializer" , () => {
 		it( "FixedTypedArray model" , async () => {
 			var data , model , params ;
 
-			model = new DataModel.FixedTypedArray( null , 'uint8' , 5 ) ;
+			model = new DataModel.FixedTypedArray( 'uint8' , 5 ) ;
 			params = { model } ;
 
 			data = [ 21 , 0 , 4 , 7 , 78 ] ;
@@ -1161,7 +1161,7 @@ describe( "Binary serializer/unserializer" , () => {
 			output = await serializeUnserialize( data , params , params ) ;
 			expect( output ).to.equal( [ 21 , 0 , 4 , 7 , 78 ] ) ;
 
-			model = new DataModel.FixedTypedArray( null , 'lps8string' , 2 ) ;
+			model = new DataModel.FixedTypedArray( 'lps8string' , 2 ) ;
 			params = { model } ;
 			data = [ "Hello my friend" , "stay awhile and listen" ] ;
 			await mutualTest( data , params , params ) ;
@@ -1170,7 +1170,7 @@ describe( "Binary serializer/unserializer" , () => {
 		it( "SealedObject model" , async () => {
 			var data , model , params ;
 
-			model = new DataModel.SealedObject( null , [
+			model = new DataModel.SealedObject( [
 				[ 'x' , 'number' ] ,
 				[ 'y' , 'number' ] ,
 				[ 'z' , 'number' ] ,
@@ -1183,7 +1183,7 @@ describe( "Binary serializer/unserializer" , () => {
 			data = { x: 3.12 , y: 7.47 , z: -4.21 , vx: 0.125 , vy: -0.125 , vz: 0 } ;
 			await mutualTest( data , params , params ) ;
 
-			model = new DataModel.SealedObject( null , [
+			model = new DataModel.SealedObject( [
 				[ 'x' , 'float32' ] ,
 				[ 'y' , 'float32' ] ,
 				[ 'z' , 'float32' ] ,
@@ -1196,7 +1196,7 @@ describe( "Binary serializer/unserializer" , () => {
 			data = { x: 3 , y: 7 , z: -4 , vx: 0.125 , vy: -0.125 , vz: 0 } ;
 			await mutualTest( data , params , params ) ;
 
-			model = new DataModel.SealedObject( null , [
+			model = new DataModel.SealedObject( [
 				[ 'firstName' , 'lps8string' ] ,
 				[ 'lastName' , 'lps8string' ] ,
 				[ 'age' , 'uint8' ] ,
@@ -1214,15 +1214,15 @@ describe( "Binary serializer/unserializer" , () => {
 		it( "Nested DataModels inside a SealedObject model" , async () => {
 			var data , params ;
 
-			var vector3dModel = new DataModel.SealedObject( null , [
+			var vector3dModel = new DataModel.SealedObject( [
 				[ 'x' , 'float32' ] ,
 				[ 'y' , 'float32' ] ,
 				[ 'z' , 'float32' ]
 			] ) ;
 
-			var inventoryModel = new DataModel.TypedArray( null , 'lps8string' ) ;
+			var inventoryModel = new DataModel.TypedArray( 'lps8string' ) ;
 
-			var entityModel = new DataModel.SealedObject( null , [
+			var entityModel = new DataModel.SealedObject( [
 				[ 'name' , 'lps8string' ] ,
 				[ 'position' , vector3dModel ] ,
 				[ 'speed' , vector3dModel ] ,
@@ -1239,12 +1239,12 @@ describe( "Binary serializer/unserializer" , () => {
 		it( "Nested DataModels inside a TypedArray model" , async () => {
 			var data , params ;
 
-			var itemModel = new DataModel.SealedObject( null , [
+			var itemModel = new DataModel.SealedObject( [
 				[ 'id' , 'lps8string' ] ,
 				[ 'quantity' , 'uint8' ]
 			] ) ;
 
-			var inventoryModel = new DataModel.TypedArray( null , itemModel ) ;
+			var inventoryModel = new DataModel.TypedArray( itemModel ) ;
 
 			params = { model: inventoryModel } ;
 
@@ -1252,8 +1252,8 @@ describe( "Binary serializer/unserializer" , () => {
 			await mutualTest( data , params , params ) ;
 			//var out = await serializeUnserialize( data , params , params ) ; console.log( "out:" , out ) ;
 
-			var vector3dModel = new DataModel.FixedTypedArray( null , 'float32' , 3 ) ;
-			var dotsModel = new DataModel.TypedArray( null , vector3dModel ) ;
+			var vector3dModel = new DataModel.FixedTypedArray( 'float32' , 3 ) ;
+			var dotsModel = new DataModel.TypedArray( vector3dModel ) ;
 
 			params = { model: dotsModel } ;
 			data = [ [ 1 , 2 , 5 ] , [ -4 , 7 , -1 ] ] ;
@@ -1265,7 +1265,7 @@ describe( "Binary serializer/unserializer" , () => {
 
 			await mutualTest( data , params , params ) ;
 
-			model = new DataModel.SealedObject( null , [
+			model = new DataModel.SealedObject( [
 				[ 'name' , 'lps8string' ] ,
 				[ 'data' , 'any' ] ,
 			] ) ;
@@ -1289,7 +1289,7 @@ describe( "Binary serializer/unserializer" , () => {
 
 			ZeClass.prototype.inc = function() { this.firstProperty ++ ; this.secondProperty ++ ; } ;
 
-			var ZeClassModel = new DataModel.SealedObject( null , [
+			var ZeClassModel = new DataModel.SealedObject( [
 				[ 'firstProperty' , 'uint16' ] ,
 				[ 'secondProperty' , 'uint16' ] ,
 			] ) ;
@@ -1327,7 +1327,7 @@ describe( "Binary serializer/unserializer" , () => {
 
 			ZeClass.prototype.inc = function() { this.firstProperty ++ ; this.secondProperty ++ ; } ;
 
-			var ZeClassModel = new DataModel.SealedObject( null , [
+			var ZeClassModel = new DataModel.SealedObject( [
 				[ 'firstProperty' , 'uint16' ] ,
 				[ 'secondProperty' , 'uint16' ] ,
 			] ) ;
@@ -1370,9 +1370,9 @@ describe( "Binary serializer/unserializer" , () => {
 
 			ZeClass.prototype.inc = function() { this.firstProperty ++ ; this.secondProperty ++ ; } ;
 
-			var ZeClassArgumentsModel = new DataModel.FixedTypedArray( null , 'uint16' , 2 ) ;
+			var ZeClassArgumentsModel = new DataModel.FixedTypedArray( 'uint16' , 2 ) ;
 
-			var ZeClassOverrideModel = new DataModel.SealedObject( null , [
+			var ZeClassOverrideModel = new DataModel.SealedObject( [
 				[ 'firstProperty' , 'uint16' ] ,
 				[ 'secondProperty' , 'uint16' ] ,
 			] ) ;
