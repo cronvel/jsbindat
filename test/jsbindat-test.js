@@ -1281,7 +1281,7 @@ describe( "Binary serializer/unserializer" , () => {
 			await mutualTest( data , params , params ) ;
 		} ) ;
 
-		it( "zzz Support constructorless instances serialization using a model" , async () => {
+		it( "Support constructorless instances serialization using a model" , async () => {
 			function ZeClass() {
 				this.firstProperty = 4 ;
 				this.secondProperty = 7 ;
@@ -1319,7 +1319,7 @@ describe( "Binary serializer/unserializer" , () => {
 			expect( fileData.length ).to.be( 37 ) ;	// instead of 101 without data model
 		} ) ;
 
-		it( "yyy Support instances with constructor serialization using a model" , async () => {
+		it( "Support instances with constructor serialization using a model" , async () => {
 			function ZeClass() {
 				this.firstProperty = 4 ;
 				this.secondProperty = 7 ;
@@ -1356,11 +1356,11 @@ describe( "Binary serializer/unserializer" , () => {
 			} ) ;
 
 			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
-			console.log( "File size:" , fileData.length ) ;
+			//console.log( "File size:" , fileData.length ) ;
 			expect( fileData.length ).to.be( 39 ) ;	// instead of 103 without data model
 		} ) ;
 
-		it( "www Support instances with constructor with arguments serialization using a model" , async () => {
+		it( "Support instances with constructor with arguments serialization using a model" , async () => {
 			function ZeClass( arg1 , arg2 ) {
 				this.arg1 = arg1 ;
 				this.arg2 = arg2 ;
@@ -1382,7 +1382,7 @@ describe( "Binary serializer/unserializer" , () => {
 					ZeClass: {
 						prototype: ZeClass.prototype ,
 						serializer: function( obj ) {
-							return { args: [ obj.arg1 , obj.arg2 ] , override: { a: obj.a , b: obj.b } } ;
+							return { args: [ obj.arg1 , obj.arg2 ] , override: { firstProperty: obj.firstProperty , secondProperty: obj.secondProperty } } ;
 						} ,
 						unserializer: function( arg1 , arg2 ) { return new ZeClass( arg1 , arg2 ) ; } ,
 						argumentsModel: ZeClassArgumentsModel ,
@@ -1392,8 +1392,8 @@ describe( "Binary serializer/unserializer" , () => {
 			} ;
 
 			var data = {
-				v: new ZeClass() ,
-				v2: new ZeClass()
+				v: new ZeClass( 15 , 13 ) ,
+				v2: new ZeClass( 10 , 11 )
 			} ;
 
 			data.v2.inc() ;
@@ -1403,8 +1403,8 @@ describe( "Binary serializer/unserializer" , () => {
 			} ) ;
 
 			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
-			console.log( "File size:" , fileData.length ) ;
-			expect( fileData.length ).to.be( 39 ) ;	// instead of 103 without data model
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 45 ) ;	// instead of 113 without data model
 		} ) ;
 	} ) ;
 } ) ;
