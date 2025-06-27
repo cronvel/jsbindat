@@ -1631,7 +1631,59 @@ describe( "Binary serializer/unserializer" , () => {
 
 			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
 			//console.log( "File size:" , fileData.length ) ;
-			expect( fileData.length ).to.be( 125 ) ;	// instead of 223 without string references
+			expect( fileData.length ).to.be( 130 ) ;	// instead of 223 without string references
+		} ) ;
+
+		it( "when using the an initial string reference array and there is mismatch of length between the serializer and unserializer's config, it should throw an error" , async () => {
+			function Person( params ) {
+				this.firstName = params.firstName ;
+				this.lastName = params.lastName ;
+				this.age = params.age ;
+			}
+
+			var data = [
+				new Person( {
+					firstName: "Bobby" ,
+					lastName: "Wallace" ,
+					age: 37
+				} ) ,
+				new Person( {
+					firstName: "Bobby" ,
+					lastName: "Armstrong" ,
+					age: 41
+				} ) ,
+				new Person( {
+					firstName: "Alice" ,
+					lastName: "Martin" ,
+					age: 34
+				} ) ,
+				new Person( {
+					firstName: "Marsellus" ,
+					lastName: "Wallace" ,
+					age: 45
+				} )
+			] ;
+
+			var serializerParams = {
+				classMap: {
+					Person: Person
+				} ,
+				referenceStrings: true ,
+				initialStringReferences: [
+					'Person' , 'firstName' , 'lastName' , 'age'
+				]
+			} ;
+
+			var unserializerParams = {
+				classMap: {
+					Person: Person
+				} ,
+				initialStringReferences: [
+					'firstName' , 'lastName' , 'age'
+				]
+			} ;
+
+			await expect( mutualTest( data , serializerParams , unserializerParams ) ).to.eventually.throw() ;
 		} ) ;
 	} ) ;
 } ) ;
