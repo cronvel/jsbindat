@@ -11,7 +11,7 @@
     "bench": "bench"
   },
   "dependencies": {
-    "stream-kit": "^0.7.2"
+    "stream-kit": "^0.7.3"
   },
   "devDependencies": {
     "string-kit": "^0.19.2"

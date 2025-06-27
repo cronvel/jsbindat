@@ -1451,7 +1451,7 @@ describe( "Binary serializer/unserializer" , () => {
 
 	describe( "Optional string store to reference them (opt-in, improve space-efficiency)" , () => {
 
-		it( "using the 'referenceStringKeys' options, it should store and reference object's keys" , async () => {
+		it( "using the 'referenceKeyStrings' options, it should store and reference object's keys" , async () => {
 			var data = [
 				{
 					firstName: "Bobby" ,
@@ -1478,7 +1478,7 @@ describe( "Binary serializer/unserializer" , () => {
 			//console.log( "File size:" , fileData.length ) ;
 			expect( fileData.length ).to.be( 141 ) ;
 
-			params = { referenceStringKeys: true } ;
+			params = { referenceKeyStrings: true } ;
 
 			await mutualTest( data , params , params ) ;
 
@@ -1487,45 +1487,151 @@ describe( "Binary serializer/unserializer" , () => {
 			expect( fileData.length ).to.be( 107 ) ;	// instead of 141 without string references
 		} ) ;
 
+		it( "using the 'referenceClassNameStrings' options, it should store and reference instance's class name" , async () => {
+			function ZeClass() {
+				this.firstProperty = 4 ;
+				this.secondProperty = 7 ;
+			}
+
+			ZeClass.prototype.inc = function() { this.firstProperty ++ ; this.secondProperty ++ ; } ;
+
+			var params = {
+				classMap: {
+					ZeClass: {
+						prototype: ZeClass.prototype ,
+						serializer: function( obj ) { return { override: obj } ; } ,
+						unserializer: function() { return new ZeClass() ; }
+					}
+				}
+			} ;
+
+			var data = {
+				v: new ZeClass() ,
+				v2: new ZeClass()
+			} ;
+
+			data.v2.inc() ;
+
+			await mutualTest( data , params , params , ( udata ) => {
+				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			} ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 103 ) ;
+
+
+			// Now with class name references...
+
+			params.referenceClassNameStrings = true ;
+			await mutualTest( data , params , params , ( udata ) => {
+				expect( Object.getPrototypeOf( udata.v ) ).to.be( ZeClass.prototype ) ;
+			} ) ;
+
+			fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 97 ) ;
+		} ) ;
+
 		it( "using the 'referenceStrings' options, it should store and reference all strings (keys and string values)" , async () => {
+			function Person( params ) {
+				this.firstName = params.firstName ;
+				this.lastName = params.lastName ;
+				this.age = params.age ;
+			}
+
 			var data = [
-				{
+				new Person( {
 					firstName: "Bobby" ,
 					lastName: "Wallace" ,
 					age: 37
-				} ,
-				{
+				} ) ,
+				new Person( {
 					firstName: "Bobby" ,
 					lastName: "Armstrong" ,
 					age: 41
-				} ,
-				{
+				} ) ,
+				new Person( {
 					firstName: "Alice" ,
 					lastName: "Martin" ,
 					age: 34
-				} ,
-				{
+				} ) ,
+				new Person( {
 					firstName: "Marsellus" ,
 					lastName: "Wallace" ,
 					age: 45
-				}
+				} )
 			] ;
 
-			var params = {} ;
+			var params = {
+				classMap: {
+					Person: Person
+				}
+			} ;
 
 			await mutualTest( data , params , params ) ;
 
 			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
 			//console.log( "File size:" , fileData.length ) ;
-			expect( fileData.length ).to.be( 191 ) ;
+			expect( fileData.length ).to.be( 223 ) ;
 
-			params = { referenceStrings: true } ;
+			
+			// Now with string references...
+			
+			params.referenceStrings = true ;
 
 			await mutualTest( data , params , params ) ;
 
 			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
 			//console.log( "File size:" , fileData.length ) ;
-			expect( fileData.length ).to.be( 130 ) ;	// instead of 191 without string references
+			expect( fileData.length ).to.be( 147 ) ;	// instead of 223 without string references
+		} ) ;
+
+		it( "using the an initial string reference array in conjunction with 'referenceStrings' options, it should even avoid serializing the first encounter of a string" , async () => {
+			function Person( params ) {
+				this.firstName = params.firstName ;
+				this.lastName = params.lastName ;
+				this.age = params.age ;
+			}
+
+			var data = [
+				new Person( {
+					firstName: "Bobby" ,
+					lastName: "Wallace" ,
+					age: 37
+				} ) ,
+				new Person( {
+					firstName: "Bobby" ,
+					lastName: "Armstrong" ,
+					age: 41
+				} ) ,
+				new Person( {
+					firstName: "Alice" ,
+					lastName: "Martin" ,
+					age: 34
+				} ) ,
+				new Person( {
+					firstName: "Marsellus" ,
+					lastName: "Wallace" ,
+					age: 45
+				} )
+			] ;
+
+			var params = {
+				classMap: {
+					Person: Person
+				} ,
+				referenceStrings: true ,
+				initialStringReferences: [
+					'Person' , 'firstName' , 'lastName' , 'age'
+				]
+			} ;
+
+			await mutualTest( data , params , params ) ;
+
+			var fileData = await fs.promises.readFile( __dirname + '/out.jsdat' ) ;
+			//console.log( "File size:" , fileData.length ) ;
+			expect( fileData.length ).to.be( 125 ) ;	// instead of 223 without string references
 		} ) ;
 	} ) ;
 } ) ;
