@@ -1,4 +1,11 @@
 
+v0.11.9
+-------
+
+New: optional magic number, to avoid reading unexpected data
+BUGFIXED: model was using latin1 instead of UTF-8 encoding
+
+
 v0.11.8
 -------
 

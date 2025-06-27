@@ -1686,6 +1686,47 @@ describe( "Binary serializer/unserializer" , () => {
 			await expect( mutualTest( data , serializerParams , unserializerParams ) ).to.eventually.throw() ;
 		} ) ;
 	} ) ;
+
+
+
+	describe( "Optional magic numbers" , () => {
+
+		it( "should throw if the 'magicNumber' options is not the same for the serializer/unserializer" , async () => {
+			var data = [
+				{
+					firstName: "Bobby" ,
+					lastName: "Wallace" ,
+					age: 37
+				} ,
+				{
+					firstName: "Jacky" ,
+					lastName: "Armstrong" ,
+					age: 41
+				} ,
+				{
+					firstName: "Alice" ,
+					lastName: "Martin" ,
+					age: 34
+				}
+			] ;
+
+			var serializerParams = { magicNumber: 'PERS' } ;
+			var unserializerParams = { magicNumber: 'PERS' } ;
+			await mutualTest( data , serializerParams , unserializerParams ) ;
+
+			serializerParams = { magicNumber: 'DATA' } ;
+			unserializerParams = { magicNumber: 'PERS' } ;
+			await expect( mutualTest( data , serializerParams , unserializerParams ) ).to.eventually.throw() ;
+
+			serializerParams = {} ;
+			unserializerParams = { magicNumber: 'PERS' } ;
+			await expect( mutualTest( data , serializerParams , unserializerParams ) ).to.eventually.throw() ;
+
+			serializerParams = { magicNumber: 'DATA' } ;
+			unserializerParams = {} ;
+			await expect( mutualTest( data , serializerParams , unserializerParams ) ).to.eventually.throw() ;
+		} ) ;
+	} ) ;
 } ) ;
 
 
